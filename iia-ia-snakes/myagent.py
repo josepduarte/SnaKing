@@ -76,7 +76,7 @@ class MyAgent1(Snake):
                # return None
             
             for n in self.getNeighbours(currentNode):
-                if not (n in closedNodes):  #falta verificação
+                if n in closedNodes:  #falta verificação
                     newMovementCost = currentNode.g_cost + self.getDistance(currentNode,n)
                 if newMovementCost < n.g_cost or n in openNodes:
                     n.g_cost=newMovementCost
@@ -90,7 +90,7 @@ class MyAgent1(Snake):
         while currentNode != startNode:
             path.append(currentNode)
             currentNode = currentNode.parent
-       # print(path.reverse)
+        print(path.reverse)
         return path[0]
 
     def getDistance(self,nodeA,nodeB):
