@@ -76,14 +76,14 @@ class MyAgent1(Snake):
                # return None
             
             for n in self.getNeighbours(currentNode):
-                if n in closedNodes:  #falta verificação
+                if not (n in closedNodes):  #falta verificação
                     newMovementCost = currentNode.g_cost + self.getDistance(currentNode,n)
-                if newMovementCost < n.g_cost or n in openNodes:
-                    n.g_cost=newMovementCost
-                    n.h_cost=self.getDistance(n,targetNode)
-                    n.parent=currentNode
-                    if not (n in openNode):
-                        openNode.append(n)
+                    if newMovementCost < n.g_cost or n in openNodes:
+                        n.g_cost=newMovementCost
+                        n.h_cost=self.getDistance(n,targetNode)
+                        n.parent=currentNode
+                        if not (n in openNode):
+                            openNode.append(n)
     def retracePath(self,startNode, endNode):
         path=[]
         currentNode = endNode
