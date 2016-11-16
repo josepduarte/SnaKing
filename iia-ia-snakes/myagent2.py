@@ -51,34 +51,41 @@ class MyAgent2(Snake):
   #          if newlen < shortest:
                     #             olddir=dir
    #             shortest=newlen
-        node1=self.aa(position,maze.foodpos)
+        node1=self.aa(position,self.direction,maze.foodpos)
         
         self.direction=(node1.x-position[0],node1.y-position[1])
         #self.direction=olddir
     
-    def aa(self,startPos,targetPos):
-        startNode=node(startPos)
-        targetNode=node(targetPos)
+    def aa(self,startPos, startDir, targetPos):
+        startNode=Node(startPos, startDir)
+        targetNode=Node(targetPos)
         openNodes=[]
         closedNodes=[]
         openNodes.append(startNode)
 
+        print("DEBUG0 - openNodes: " + str([node for node in openNodes]))
+
         while openNodes!=[]:
+
+            print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
+
             currentNode = openNodes[0]
             openNodes.remove(currentNode)
             print("aasd"+str(openNodes)) 
             for n in openNodes:
                 print("asd")
-                if n.f_cost() < currentNode.f_cost() or n.f_cost() == currentNode.f_cost() and openNode.hCost < currentNode.hCost:
+                if n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and openNode.hCost < currentNode.hCost:
                     currentNode = n
            # openNode.remove(currentNode)
             closedNodes.append(currentNode)
-            print("123")
+            
+            print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
+
             if currentNode == targetNode:
                return retracePath(startNode,targetNode)
             
-            for n in [node((coor[0],coor[1]),currentNode.gCost+1) for coor in self.getNeighbours(currentNode)]:#otimizar
-                 
+            for n in self.getNeighbours(currentNode):#otimizar
+                print("DEBUG NEIGHBOURS: " + str([str(neig) for neig in self.getNeighbours(currentNode)]))
                 if not (n in closedNodes) and not (n in openNodes):  #falta verificação
                    # newMovementCost = currentNode.gCost + self.getDistance(currentNode,n)
                    # newMovementCost = currentNode.gCost + 1
@@ -89,7 +96,8 @@ class MyAgent2(Snake):
                    # if not (n in openNodes):
                    print("qw"+str(n))
                    openNodes.append(n)
-                
+            print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
+
     def retracePath(self,startNode, endNode):
         path=[]
         currentNode = endNode
@@ -109,20 +117,25 @@ class MyAgent2(Snake):
 
     def getNeighbours(self,node):
         neighbours = []
-
-        for x in range(-1,2):  
-            for y in range(-1,2):
-                if x != 0 and y != 0:
-                    if x!=1 and y!=1:
-                        coorX = node.x+x
-                        coorY = node.y+y
-                        if coorX >=0 and coorX <=39 and coorY>=0 and coorY <=59:
-                            neighbours.append((coorX,coorY))
+        for dir in self.getValidDirs(node):
+            coord = self.add((node.x,node.y),dir)
+            if coord[0] >=0 and coord[0] <=39 and coord[1]>=0 and coord[1] <=59: #que validação é esta ?
+                newnode = Node(coord, dir)
+                neighbours.append(newnode)
         return neighbours
-class node:
-    def __init__(self,coord,gCost=0):
+    def getValidDirs(self,node):
+        dirs = []
+        complement=[(up,down),(down,up),(right,left),(left,right)]
+        invaliddir=[x for (x,y) in complement if y==node.dir]
+        return [dir for dir in directions if not ( dir in invaliddir )]
+
+        # !! Devo ter isto em conta: validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+
+class Node:
+    def __init__(self,coord,dir=(0,0), gCost=0):
         self.x=coord[0]
         self.y=coord[1]
+        self.dir=dir
         self.parent=None
         self.gCost=gCost
         self.hCost=None
