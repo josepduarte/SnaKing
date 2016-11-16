@@ -82,8 +82,8 @@ class MyAgent1(Snake):
                         n.g_cost=newMovementCost
                         n.h_cost=self.getDistance(n,targetNode)
                         n.parent=currentNode
-                        if not (n in openNode):
-                            openNode.append(n)
+                        if not (n in openNodes):
+                            openNodes.append(n)
 
             print("blaaaaa")
                          
