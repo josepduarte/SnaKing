@@ -109,9 +109,9 @@ class MyAgent2(Snake):
             path.append(currentNode)
             print("CURRENT NODE PARETN: " + str(currentNode.parent))
             currentNode = currentNode.parent
-        path=path.reverse
-        print("PATH: " + str(path))
-        print("PATH BLA: " + path[0].x,path[1].y)
+        print("PATH BEFORE REVERSE" + str(path))
+        path.reverse()
+        print("PATH AFTER REVERSE: " + str(path))
         return path[0]
 
     def getDistance(self,nodeA,nodeB):
