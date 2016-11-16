@@ -66,8 +66,9 @@ class MyAgent2(Snake):
         while openNodes!=[]:
             currentNode = openNodes[0]
             openNodes.remove(currentNode)
-            
+            print("aasd"+str(openNodes)) 
             for n in openNodes:
+                print("asd")
                 if n.f_cost() < currentNode.f_cost() or n.f_cost() == currentNode.f_cost() and openNode.hCost < currentNode.hCost:
                     currentNode = n
            # openNode.remove(currentNode)
@@ -76,18 +77,19 @@ class MyAgent2(Snake):
             if currentNode == targetNode:
                return retracePath(startNode,targetNode)
             
-            for n in [node((coor[0],coor[1])) for coor in self.getNeighbours(currentNode)]:#otimizar
-
-                if not (n in closedNodes):  #falta verificação
-                    print("teste")
-                    newMovementCost = currentNode.gCost + self.getDistance(currentNode,n)
-                    if newMovementCost < n.gCost or n in openNodes:
-                        n.gCcost=newMovementCost
-                        n.hCost=self.getDistance(n,targetNode)
-                        n.parent=currentNode
-                        if not (n in openNode):
-                            openNode.append(n)
-
+            for n in [node((coor[0],coor[1]),currentNode.gCost+1) for coor in self.getNeighbours(currentNode)]:#otimizar
+                 
+                if not (n in closedNodes) and not (n in openNodes):  #falta verificação
+                   # newMovementCost = currentNode.gCost + self.getDistance(currentNode,n)
+                   # newMovementCost = currentNode.gCost + 1
+                   # if newMovementCost < n.gCost or not n in openNodes:
+                   # n.gCcost=newMovementCost
+                   n.hCost=self.getDistance(n,targetNode)
+                   # n.parent=currentNode
+                   # if not (n in openNodes):
+                   print("qw"+str(n))
+                   openNodes.append(n)
+                
     def retracePath(self,startNode, endNode):
         path=[]
         currentNode = endNode
@@ -101,7 +103,7 @@ class MyAgent2(Snake):
         distX = math.fabs(nodeA.x-nodeB.x)
         distY = math.fabs(nodeA.y-nodeB.y)
         if distX > distY:
-            return disty + distX-distY
+            return distY + distX-distY
         else:
             return distX + distY-distX
 
@@ -118,14 +120,16 @@ class MyAgent2(Snake):
                             neighbours.append((coorX,coorY))
         return neighbours
 class node:
-    def __init__(self,coord):
+    def __init__(self,coord,gCost=0):
         self.x=coord[0]
         self.y=coord[1]
         self.parent=None
-        self.gCost=0
+        self.gCost=gCost
         self.hCost=None
     def __str__(self):
         return str((self.x,self.y))
+    def __eq__(self,other):
+        return self.x==other.x and self.y==other.y
     def fCost(self):
         return self.hCost+self.gCost
     def addgCost(self,addG):
