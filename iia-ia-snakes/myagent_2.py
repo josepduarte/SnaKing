@@ -109,20 +109,27 @@ class MyAgent1(Snake):
 
     def getNeighbours(self,node):
         neighbours = []
-        for x in range(-1,2):
-            for y in range(-1,2):
-                if x == 0 and y == 0:
-                    break
-                else:
-                    coorx = node.x+x
-                    coory = node.y+y
-                    if coorx >=0 and coorx <=39 and coory>=0 and coory <=59:
-                        neighbours.append(node)
-        return neighbours
+        for dir in getValidDirs(node):
+            coord = self.add((node.x,node.y),dir)
+            if coorx >=0 and coorx <=39 and coory>=0 and coory <=59: #que validação é esta ?
+                newnode = node(coord, dir)
+                neighbours.append(newnode)
+
+    def getValidDirs(self,node):
+        dirs = []
+        complement=[(up,down),(down,up),(right,left),(left,right)]
+        invaliddir=[x for (x,y) in complement if y==node.dir]
+        return [dir for dir in directions if not ( dir in invaliddir )]
+
+        # !! Devo ter isto em conta: validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+
+
+
 class node:
-    def __init__(self,coord):
+    def __init__(self,coord,dir):
         self.x=coord[0]
         self.y=coord[1]
+        self.dir = dir
         self.parent=None
         self.g_cost=None
         self.h_cost=None
