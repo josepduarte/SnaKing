@@ -86,33 +86,32 @@ class MyAgent2(Snake):
 
             if currentNode == targetNode:
                print("DEBUG 1O")
-               return self.retracePath(startNode,targetNode)
+               return self.retracePath(startNode,currentNode)
+
             
-            for n in self.getNeighbours(currentNode):#otimizar
-                #print("DEBUG NEIGHBOURS: " + str([str(neig) for neig in self.getNeighbours(currentNode)]))
-                
-                if not (n in closedNodes) and not (n in openNodes):  #falta verificação
-                   # newMovementCost = currentNode.gCost + self.getDistance(currentNode,n)
-                   # newMovementCost = currentNode.gCost + 1
-                   # if newMovementCost < n.gCost or not n in openNodes:
-                   # n.gCcost=newMovementCost
-                   n.hCost=self.getDistance(n,targetNode)
-                   n.parent=currentNode
-                   # if not (n in openNodes):
-                   openNodes.append(n)
+            for n in self.getNeighbours(currentNode, targetNode):#otimizar
+                if n not in closedNodes and n not in openNodes:
+                    openNodes.append(n)
+
+
             openNodes.sort(key=lambda x: x.fCost())
            # print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
+
+
 
     def retracePath(self,startNode, endNode):
         path=[]
         print("DEBUG 12-")
         currentNode = endNode
+        print("ENDNODE: " + str(endNode))
         while currentNode != startNode:
+            print("CURREENT NODE: ------ " + str(currentNode))
             path.append(currentNode)
+            print("CURRENT NODE PARETN: " + str(currentNode.parent))
             currentNode = currentNode.parent
         path=path.reverse
-        print(path)
-        print(path[0].x,path[1].y)
+        print("PATH: " + str(path))
+        print("PATH BLA: " + path[0].x,path[1].y)
         return path[0]
 
     def getDistance(self,nodeA,nodeB):
@@ -123,12 +122,13 @@ class MyAgent2(Snake):
         else:
             return distX + distY-distX
 
-    def getNeighbours(self,node):
+    def getNeighbours(self,node,foodNode):
         neighbours = []
         for dir in self.getValidDirs(node):
             coord = self.add((node.x,node.y),dir)
             if coord[0] >=0 and coord[0] <=39 and coord[1]>=0 and coord[1] <=59: #que validação é esta ?
-                newnode = Node(coord, dir,node.gCost+1)
+                newnode = Node(coord, dir,node.gCost+1,parent=node)
+                newnode.hCost = self.getDistance(newnode,foodNode)
                 neighbours.append(newnode)
         return neighbours
     def getValidDirs(self,node):
@@ -140,13 +140,13 @@ class MyAgent2(Snake):
         # !! Devo ter isto em conta: validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
 
 class Node:
-    def __init__(self,coord,dir=(0,0), gCost=0):
+    def __init__(self,coord,dir=(0,0), gCost=0, hCost=0, parent=None):
         self.x=coord[0]
         self.y=coord[1]
         self.dir=dir
-        self.parent=None
+        self.parent=parent
         self.gCost=gCost
-        self.hCost=None
+        self.hCost=hCost
     def __str__(self):
         return str((self.x,self.y))
     def __eq__(self,other):
