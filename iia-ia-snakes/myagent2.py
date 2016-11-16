@@ -51,12 +51,13 @@ class MyAgent2(Snake):
   #          if newlen < shortest:
                     #             olddir=dir
    #             shortest=newlen
-        node1=self.aa(position,self.direction,maze.foodpos)
+        node1=self.aa(position,self.direction,maze)
         
         self.direction=(node1.x-position[0],node1.y-position[1])
         #self.direction=olddir
     
-    def aa(self,startPos, startDir, targetPos):
+    def aa(self,startPos, startDir, maze):
+        targetPos = maze.foodpos
         startNode=Node(startPos, startDir)
         targetNode=Node(targetPos)
         openNodes=[]
@@ -89,7 +90,7 @@ class MyAgent2(Snake):
                return self.retracePath(startNode,currentNode)
 
             
-            for n in self.getNeighbours(currentNode, targetNode):#otimizar
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
 
@@ -122,22 +123,22 @@ class MyAgent2(Snake):
         else:
             return distX + distY-distX
 
-    def getNeighbours(self,node,foodNode):
+    def getNeighbours(self,node,foodNode,maze):
         neighbours = []
-        for dir in self.getValidDirs(node):
+        for dir in self.getValidDirs(node,maze):
             coord = self.add((node.x,node.y),dir)
             if coord[0] >=0 and coord[0] <=39 and coord[1]>=0 and coord[1] <=59: #que validação é esta ?
                 newnode = Node(coord, dir,node.gCost+1,parent=node)
                 newnode.hCost = self.getDistance(newnode,foodNode)
                 neighbours.append(newnode)
         return neighbours
-    def getValidDirs(self,node):
+    def getValidDirs(self,node,maze):
+        position=node.get_pos()
         dirs = []
         complement=[(up,down),(down,up),(right,left),(left,right)]
         invaliddir=[x for (x,y) in complement if y==node.dir]
-        return [dir for dir in directions if not ( dir in invaliddir )]
-
-        # !! Devo ter isto em conta: validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+        validdir = [dir for dir in directions if not ( dir in invaliddir )]
+        return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
 
 class Node:
     def __init__(self,coord,dir=(0,0), gCost=0, hCost=0, parent=None):
@@ -153,3 +154,5 @@ class Node:
         return self.x==other.x and self.y==other.y
     def fCost(self):
         return self.hCost+self.gCost
+    def get_pos(self):
+        return (self.x, self.y)
