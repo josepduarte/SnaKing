@@ -44,7 +44,7 @@ class MyAgent2(Snake):
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         #shortest path.....we assume that the direction we are currently going now gives the shortest path
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos, maze.obstacles)#length in shortest path
-        print(maze.foodpos)
+        #print(maze.foodpos)
    #     for dir in validdir:
                 #          newpos=self.add(position,dir)
   #          newlen=self.pathlen(newpos , maze.foodpos, maze.obstacles)#length in shortest path
