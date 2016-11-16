@@ -53,7 +53,7 @@ class MyAgent2(Snake):
    #             shortest=newlen
         node1=self.aa(position,self.direction,maze)
         
-        self.direction=(node1.x-position[0],node1.y-position[1])
+        self.direction= (node1.x-position[0],node1.y-position[1]) if node1 else olddir
         #self.direction=olddir
     
     def aa(self,startPos, startDir, maze):
@@ -71,22 +71,20 @@ class MyAgent2(Snake):
             #print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
 
             currentNode = openNodes[0]
-        #    openNodes.remove(currentNode)
+            openNodes.remove(currentNode)
              
             #for n in openNodes:
             #    if n!=currentNode and n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and n.hCost < currentNode.hCost:
              #       currentNode = n
-            for i in range(1,len(openNodes)):
-                if openNodes[i].fCost() < currentNode.fCost() or(openNodes[i].fCost() == currentNode.fCost() and openNodes[i].hCost < currentNode.hCost):
-                    print("Debug 13")
-                    currentNode = openNodes[i]
-            openNodes.remove(currentNode)
+            for node in openNodes:
+                if node.fCost() < currentNode.fCost() or(node.fCost() == currentNode.fCost() and node.hCost < currentNode.hCost):
+                    currentNode = node
+
             closedNodes.append(currentNode)
             
             #print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
 
             if currentNode == targetNode:
-               print("DEBUG 1O")
                return self.retracePath(startNode,currentNode)
 
             
@@ -102,17 +100,17 @@ class MyAgent2(Snake):
 
     def retracePath(self,startNode, endNode):
         path=[]
-        print("DEBUG 12-")
+        #print("DEBUG 12-")
         currentNode = endNode
-        print("ENDNODE: " + str(endNode))
+        #print("ENDNODE: " + str(endNode))
         while currentNode != startNode:
-            print("CURREENT NODE: ------ " + str(currentNode))
+            #print("CURREENT NODE: ------ " + str(currentNode))
             path.append(currentNode)
-            print("CURRENT NODE PARETN: " + str(currentNode.parent))
+            #print("CURRENT NODE PARETN: " + str(currentNode.parent))
             currentNode = currentNode.parent
-        print("PATH BEFORE REVERSE" + str(path))
+        #print("PATH BEFORE REVERSE" + str(path))
         path.reverse()
-        print("PATH AFTER REVERSE: " + str(path))
+        #print("PATH AFTER REVERSE: " + str(path))
         return path[0]
 
     def getDistance(self,nodeA,nodeB):
