@@ -63,48 +63,56 @@ class MyAgent2(Snake):
         closedNodes=[]
         openNodes.append(startNode)
 
-        print("DEBUG0 - openNodes: " + str([node for node in openNodes]))
+       # print("DEBUG0 - openNodes: " + str([node for node in openNodes]))
 
         while openNodes!=[]:
 
-            print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
+            #print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
 
             currentNode = openNodes[0]
+        #    openNodes.remove(currentNode)
+             
+            #for n in openNodes:
+            #    if n!=currentNode and n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and n.hCost < currentNode.hCost:
+             #       currentNode = n
+            for i in range(1,len(openNodes)):
+                if openNodes[i].fCost() < currentNode.fCost() or(openNodes[i].fCost() == currentNode.fCost() and openNodes[i].hCost < currentNode.hCost):
+                    print("Debug 13")
+                    currentNode = openNodes[i]
             openNodes.remove(currentNode)
-            print("aasd"+str(openNodes)) 
-            for n in openNodes:
-                print("asd")
-                if n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and openNode.hCost < currentNode.hCost:
-                    currentNode = n
-           # openNode.remove(currentNode)
             closedNodes.append(currentNode)
             
-            print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
+            #print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
 
             if currentNode == targetNode:
-               return retracePath(startNode,targetNode)
+               print("DEBUG 1O")
+               return self.retracePath(startNode,targetNode)
             
             for n in self.getNeighbours(currentNode):#otimizar
-                print("DEBUG NEIGHBOURS: " + str([str(neig) for neig in self.getNeighbours(currentNode)]))
+                #print("DEBUG NEIGHBOURS: " + str([str(neig) for neig in self.getNeighbours(currentNode)]))
+                
                 if not (n in closedNodes) and not (n in openNodes):  #falta verificação
                    # newMovementCost = currentNode.gCost + self.getDistance(currentNode,n)
                    # newMovementCost = currentNode.gCost + 1
                    # if newMovementCost < n.gCost or not n in openNodes:
                    # n.gCcost=newMovementCost
                    n.hCost=self.getDistance(n,targetNode)
-                   # n.parent=currentNode
+                   n.parent=currentNode
                    # if not (n in openNodes):
-                   print("qw"+str(n))
                    openNodes.append(n)
-            print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
+            openNodes.sort(key=lambda x: x.fCost())
+           # print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
 
     def retracePath(self,startNode, endNode):
         path=[]
+        print("DEBUG 12-")
         currentNode = endNode
         while currentNode != startNode:
             path.append(currentNode)
             currentNode = currentNode.parent
         path=path.reverse
+        print(path)
+        print(path[0].x,path[1].y)
         return path[0]
 
     def getDistance(self,nodeA,nodeB):
@@ -120,7 +128,7 @@ class MyAgent2(Snake):
         for dir in self.getValidDirs(node):
             coord = self.add((node.x,node.y),dir)
             if coord[0] >=0 and coord[0] <=39 and coord[1]>=0 and coord[1] <=59: #que validação é esta ?
-                newnode = Node(coord, dir)
+                newnode = Node(coord, dir,node.gCost+1)
                 neighbours.append(newnode)
         return neighbours
     def getValidDirs(self,node):
@@ -145,5 +153,3 @@ class Node:
         return self.x==other.x and self.y==other.y
     def fCost(self):
         return self.hCost+self.gCost
-    def addgCost(self,addG):
-        self.gCost=self.gCost+addG
