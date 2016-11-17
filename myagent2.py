@@ -53,7 +53,8 @@ class MyAgent2(Snake):
    #             shortest=newlen
         node1=self.aa(position,self.direction,maze)
         
-        self.direction= (node1.x-position[0],node1.y-position[1]) if node1 else olddir
+        # !!!! solução apenas para nunca ter direction a None
+        self.direction= (node1.x-position[0],node1.y-position[1]) if node1 else olddir 
         #self.direction=olddir
     
     def aa(self,startPos, startDir, maze):
@@ -73,6 +74,8 @@ class MyAgent2(Snake):
             currentNode = openNodes[0]
             openNodes.remove(currentNode)
              
+            # !!! Não falta adicionar o current node aos closed???
+
             #for n in openNodes:
             #    if n!=currentNode and n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and n.hCost < currentNode.hCost:
              #       currentNode = n
@@ -99,6 +102,9 @@ class MyAgent2(Snake):
 
 
     def retracePath(self,startNode, endNode):
+        #
+        #   !! path às vezes está a returnar none
+        #
         path=[]
         #print("DEBUG 12-")
         currentNode = endNode
@@ -130,7 +136,26 @@ class MyAgent2(Snake):
                 newnode.hCost = self.getDistance(newnode,foodNode)
                 neighbours.append(newnode)
         return neighbours
-    def getValidDirs(self,node,maze):
+    def getValidDirs(self,node,maze):       
+        # considerar todas as posições em vez de apenas os validdirs
+        #   | 2 | 1 | 2 |
+        #   | 3 | » | 1 |
+        #   | 2 | 1 | 2 |
+        #
+        """
+        neighbours = []
+
+        for x in range(-1,2):
+            for y in range(-1,2):
+                if x == 0 and y == 0:
+                    break
+                else:
+                    coor_x = node.x+x
+                    coor_y = node.y+y
+                    if coor_x >=0 and coor_x <=39 and coor_y>=0 and coor_y <=59:
+                        neighbours.append((coor_x,coor_y))
+        return neighbours
+        """
         position=node.get_pos()
         dirs = []
         complement=[(up,down),(down,up),(right,left),(left,right)]
