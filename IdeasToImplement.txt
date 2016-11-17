@@ -1,0 +1,4 @@
+- considerar todos os nós na fronteira com os devidos custos (cuidado para ver se está nela própria)
+- tornar algoritmos mais eficientes
+	- adicionar já na posição certa em vez de ordenar apenas no fim
+- 
