@@ -3,12 +3,12 @@ from constants import *
 import math
 
 class MyAgent2(Snake):
-    def __init__(self,body=[(0,0)] , direction=(1,0)):
-        super().__init__(body,direction,name="MyAgent1")
-    def pathlen(self,a,b,obstacles):
+    def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
+        super().__init__(body,direction,name=name)
+    def pathlen(self,a,b):
         return int( ((a[0]-b[0])**2 + (a[1]-b[1])**2 )**0.5)
     def add(self,a,b):
-        return (a[0]+b[0])%60,(a[1]+b[1])%40
+        return a[0]+b[0],a[1]+b[1]
     def update(self,points=None, mapsize=None, count=None,agent_time=None):
         pass
     def space(self,newdir):
@@ -43,7 +43,7 @@ class MyAgent2(Snake):
         #if we collide then set olddir to first move of validdir (if validdir is empty then leave it to olddir)
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         #shortest path.....we assume that the direction we are currently going now gives the shortest path
-        shortest=self.pathlen(self.add(position,olddir) , maze.foodpos, maze.obstacles)#length in shortest path
+        shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)#length in shortest path
         #print(maze.foodpos)
    #     for dir in validdir:
                 #          newpos=self.add(position,dir)

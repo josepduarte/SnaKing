@@ -1,6 +1,7 @@
 from game import *
 from human import HumanSnake
 from agent1 import Agent1
+from myagent2 import MyAgent2
 import sys, getopt
 
 #start the game
@@ -25,7 +26,7 @@ def main(argv):
     snake.setObstacles(15,inputfile) #level of obstacles
     snake.setPlayers([  
         Agent1([snake.playerPos()], name="Alice"),
-        Agent1([snake.playerPos()], name="Bob"),
+        MyAgent2([snake.playerPos()], name="Bob"),
 #        HumanSnake([snake.playerPos()], name="Meat"),
     ])
     snake.start()
