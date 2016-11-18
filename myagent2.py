@@ -5,6 +5,7 @@ import math
 class MyAgent2(Snake):
     def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
         super().__init__(body,direction,name=name)
+        self.path = []
     def pathlen(self,a,b):
         return int( ((a[0]-b[0])**2 + (a[1]-b[1])**2 )**0.5)
     def add(self,a,b):
@@ -51,16 +52,21 @@ class MyAgent2(Snake):
   #          if newlen < shortest:
                     #             olddir=dir
    #             shortest=newlen
-        node1=self.aa(position,self.direction,maze)
-        
+                
         # !!!! solução apenas para nunca ter direction a None
-        self.direction= (node1.x-position[0],node1.y-position[1]) if node1 else olddir 
+        print("SELF PATH: " + str(self.path))
+        if(len(self.path)<5):
+            self.path=self.aa(position,self.direction,maze)
+            print("SELF PATH INSIDE IF: " + str(self.path))
+            self.direction = (self.path[-1].dir) if self.path else olddir # if self.path está por segurança 
+        else:
+            self.direction = self.path[-1].dir
+        self.path = self.path[:-1]
         #self.direction=olddir
     
     def aa(self,startPos, startDir, maze):
-        targetPos = maze.foodpos
         startNode=Node(startPos, startDir)
-        targetNode=Node(targetPos)
+        targetNode=Node(maze.foodpos)
         openNodes=[]
         closedNodes=[]
         openNodes.append(startNode)
@@ -72,7 +78,6 @@ class MyAgent2(Snake):
             #print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
 
             currentNode = openNodes[0]
-            openNodes.remove(currentNode)
              
             # !!! Não falta adicionar o current node aos closed???
 
@@ -83,6 +88,7 @@ class MyAgent2(Snake):
                 if node.fCost() < currentNode.fCost() or(node.fCost() == currentNode.fCost() and node.hCost < currentNode.hCost):
                     currentNode = node
 
+            openNodes.remove(currentNode)
             closedNodes.append(currentNode)
             
             #print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
@@ -93,19 +99,22 @@ class MyAgent2(Snake):
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
                 if n not in closedNodes and n not in openNodes:
+                    n.hCost = self.getDistance(n,targetNode)
                     openNodes.append(n)
 
 
-            openNodes.sort(key=lambda x: x.fCost())
+           # openNodes.sort(key=lambda x: x.fCost())
            # print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
 
-
+        print("BLAAAAAAAA")
 
     def retracePath(self,startNode, endNode):
         #
         #   !! path às vezes está a returnar none
         #
         path=[]
+        print("STARTNODE: " + str(startNode))
+        print("ENDNODE: " + str(endNode))
         #print("DEBUG 12-")
         currentNode = endNode
         #print("ENDNODE: " + str(endNode))
@@ -115,9 +124,10 @@ class MyAgent2(Snake):
             #print("CURRENT NODE PARETN: " + str(currentNode.parent))
             currentNode = currentNode.parent
         #print("PATH BEFORE REVERSE" + str(path))
-        path.reverse()
+        #path.reverse()
         #print("PATH AFTER REVERSE: " + str(path))
-        return path[0]
+        print("PATH: " + str(path[0]))
+        return path if path else [startNode]
 
     def getDistance(self,nodeA,nodeB):
         distX = math.fabs(nodeA.x-nodeB.x)
