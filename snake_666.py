@@ -19,22 +19,16 @@ class MyAgent666(Snake):
     def update(self,points=None, mapsize=None, count=None,agent_time=None):
         pass
     def updateDirection(self,maze):
-        #this is the brain of the snake player
         olddir=self.direction
         position=self.body[0]
         
-        #new direction can't be up if current direction is down...and so on
         complement=[(up,down),(down,up),(right,left),(left,right)]
         invaliddir=[x for (x,y) in complement if y==olddir]
         validdir=[dir for dir in directions if not ( dir in invaliddir )]
         
-        #get the list of valid directions for us
-        validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
-       # print(maze.playerpos)
-        #if we collide then set olddir to first move of validdir (if validdir is empty then leave it to olddir)
+        validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] 
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
-        #shortest path.....we assume that the direction we are currently going now gives the shortest path
-        shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)#length in shortest path
+        shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
         
         opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
         if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
@@ -64,34 +58,17 @@ class MyAgent666(Snake):
         closedNodes=[]
         openNodes.append(startNode)
 
-       # print("DEBUG0 - openNodes: " + str([node for node in openNodes]))
-
         while openNodes!=[]:
-
-            #print("DEBUG1 - openNodes: " + str([str(node) for node in openNodes]))
-
             currentNode = openNodes[0]
              
-            # !!! Não falta adicionar o current node aos closed???
-
-            #for n in openNodes:
-            #    if n!=currentNode and n.fCost() < currentNode.fCost() or n.fCost() == currentNode.fCost() and n.hCost < currentNode.hCost:
-             #       currentNode = n
-            #print("LEN OF OPEN NODES BEFORE IF: " + str(len(openNodes)))
-            #if len(openNodes) > 50:
-           #     openNodes = openNodes[-50:]
-            #print("LEN OF OPEN NODES AFTER IF: " + str(len(openNodes)))
             for node in openNodes:
-             #   print("Node: " + str(node) + "- f cost = " + str(node.fCost()))
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
-            
-         #   print("DEBUG2 - openNodes: " + str([str(node) for node in openNodes]))
-         #   print("CurrentNode - " + str(currentNode) + "== Target Node - " + str(targetNode))
+        
             if currentNode == targetNode:
                return self.retracePath(startNode,currentNode)
 
@@ -100,66 +77,23 @@ class MyAgent666(Snake):
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
 
-
-           # openNodes.sort(key=lambda x: x.fCost())
-           # print("DEBUG3 - openNodes: " + str([str(node) for node in openNodes]))
-
-     #   print("BLAAAAAAAA")
-
     def retracePath(self,startNode, endNode):
-        #
-        #   !! path às vezes está a returnar none
-        #
         path=[]
-      #  print("STARTNODE: " + str(startNode))
-     #   print("ENDNODE: " + str(endNode))
-        #print("DEBUG 12-")
         currentNode = endNode
-        #print("ENDNODE: " + str(endNode))
         while currentNode != startNode:
-            print("CURRENT NODE: " + str(currentNode))
-            print("START NODE: " + str(startNode))
-            print("DIR OF CURRENT NODE" + str(currentNode.dir))
-            #print("CURREENT NODE: ------ " + str(currentNode))
             path.append(currentNode)
-            #print("CURRENT NODE PARETN: " + str(currentNode.parent))
             currentNode = currentNode.parent
-        #print("PATH BEFORE REVERSE" + str(path))
-        #path.reverse()
-        #print("PATH AFTER REVERSE: " + str(path))
-    #    print("PATH: " + str(path[0]))
         return path #if path else [startNode]
 
     def getNeighbours(self,node,foodNode,maze):
-        #possibleNeighbours = 
         neighbours = []
         for dir in self.getValidDirs(node,maze):
             coord = self.add((node.x,node.y),dir)
-       # if coord[0] >=0 and coord[0] <=39 and coord[1]>=0 and coord[1] <=59: #que validação é esta ?
             newnode = Node(coord, dir=dir,gCost=node.gCost+1,parent=node)
             newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
             neighbours.append(newnode)
         return neighbours
     def getValidDirs(self,node,maze):       
-        # considerar todas as posições em vez de apenas os validdirs
-        #   | 2 | 1 | 2 |
-        #   | 3 | » | 1 |
-        #   | 2 | 1 | 2 |
-        #
-        """
-        neighbours = []
-
-        for x in range(-1,2):
-            for y in range(-1,2):
-                if x == 0 and y == 0:
-                    break
-                else:
-                    coor_x = node.x+x
-                    coor_y = node.y+y
-                    if coor_x >=0 and coor_x <=39 and coor_y>=0 and coor_y <=59:
-                        neighbours.append((coor_x,coor_y))
-        return neighbours
-        """
         position=node.get_pos()
         dirs = []
         complement=[(up,down),(down,up),(right,left),(left,right)]
