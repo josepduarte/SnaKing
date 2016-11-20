@@ -36,7 +36,10 @@ class MyAgent666(Snake):
         #shortest path.....we assume that the direction we are currently going now gives the shortest path
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)#length in shortest path
         
-        if(shortest>5):
+        opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
+        if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
+            self.direction=validdir[0]
+        elif(shortest>5):
             print("----- > 5 ------")
             for dir in validdir:
                 newpos=self.add(position,dir)
