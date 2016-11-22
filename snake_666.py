@@ -121,8 +121,6 @@ class MyAgent666(Snake):
         invaliddir = [y for (x,y) in diagComplement if x == node.dir]
         validdir = [dir for dir in diagDirections if not ( dir in invaliddir )]
 
-        print(str(validdir))
-
         return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body]
 
 class Node:
