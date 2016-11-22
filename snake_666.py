@@ -102,6 +102,22 @@ class MyAgent666(Snake):
             newnode = Node(coord, dir=dir,gCost=node.gCost+1,parent=node)
             newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
             neighbours.append(newnode)
+        for diagDir in self.getValidDirsDiag(node,maze):
+            coord = self.add((node.x,node.y),diagDir)
+            if node.dir == up or node.dir == down:
+                if diagDir == (-1,-1) or diagDir == (-1,1):
+                    dir = left
+                else:
+                    dir = right
+            else:
+                if diagDir == (-1,-1) or diagDir == (1,-1):
+                    dir = up
+                else:
+                    dir = down
+            newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node)
+            newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
+            neighbours.append(newnode)
+
         print("NEIGBOURS: " + str([str(a) for a in neighbours]))
         return neighbours
     def getValidDirs(self,node,maze):       
@@ -110,7 +126,18 @@ class MyAgent666(Snake):
         complement=[(up,down),(down,up),(right,left),(left,right)]
         invaliddir=[x for (x,y) in complement if y==node.dir]
         validdir = [dir for dir in directions if not ( dir in invaliddir )]
+
         return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+
+    def getValidDirsDiag(self,node,maze):       
+        position=node.get_pos()
+
+        diagComplement =[(up,(-1,1)), (up, (1,1)) , (down, (1,-1)), (down, (-1,-1)), (left, (1, 1)), (left, (1, -1)), (right, (-1,1)), (right, (-1, -1))]
+        diagDirections = [(1,1),(1,-1),(-1,1),(-1,-1)]
+        invaliddir = [x for (x,y) in diagComplement if y == node.dir]
+        validdir = [dir for dir in diagDirections if not ( dir in invaliddir )]
+
+        return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body]
 
 class Node:
     def __init__(self,coord,dir=(0,0), gCost=0, hCost=0, parent=None):
