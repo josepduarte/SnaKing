@@ -33,28 +33,21 @@ class MyAgent666(Snake):
         #opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
         #if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
         #    self.direction=olddir
-        if(shortest>10):
-        #    print("----- > 5 ------")
+        if(shortest>30):
             for dir in validdir:
                 newpos=self.add(position,dir)
                 newlen=self.pathlen(newpos , maze.foodpos)#length in shortest path
                 if newlen < shortest:
                     olddir=dir
                     shortest=newlen
-            #print("DIR in greater than 5: " + str(olddir))
             self.direction=olddir  
         else:
-          #  print("-------- < 5 --------")
             path = self.aa(position, self.direction, maze)
             dir = path[-1].dir
-            #print("DIR: " + str(dir))
             self.direction = dir # if self.path está por segurança 
-        print("DIR ASSUMED: " + str(self.direction))
 
     
     def aa(self,startPos, startDir, maze):
-        print("----------------------------------------------------------------------------------------startPOS: " + str(startPos))
-        print("------------________________-----------------_----------------_------___________--------foodNode: " + str(maze.foodpos))
         startNode=Node(startPos, dir=startDir)
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
@@ -65,13 +58,9 @@ class MyAgent666(Snake):
         while openNodes!=[]:
             currentNode = openNodes[0]
              
-            print("CURRENT NODE: " + str(currentNode))
-            print("CURRENT NODE BEFORE FOR: " + str(currentNode) + " -> fcost= " + str(currentNode.fCost()))
             for node in openNodes:
-                print("--- NODE " + str(node) + "NODE.gCOST = " + str(node.gCost) + "NODE.hCOST = " + str(node.hCost) + "NODE.FCOST = " + str(node.fCost()))
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
-            print("CURRENT NODE AFTER FOR: " + str(currentNode) + " -> fcost= " + str(currentNode.fCost()) + "DIR: " + str(currentNode.dir))
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
@@ -80,11 +69,9 @@ class MyAgent666(Snake):
             if currentNode == targetNode:
                return self.retracePath(startNode,currentNode)
 
-            print("___________PRINT NEIGBOURHS OF " + str(currentNode) + "_____________")
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
-            print("_---------------------------------_")
 
     def retracePath(self,startNode, endNode):
         path=[]
@@ -96,7 +83,6 @@ class MyAgent666(Snake):
 
     def getNeighbours(self,node,foodNode,maze):
         neighbours = []
-        print("NODE: " + str(node) + " -> dir: " + str(node.dir))
         for dir in self.getValidDirs(node,maze):
             coord = self.add((node.x,node.y),dir)
             newnode = Node(coord, dir=dir,gCost=node.gCost+1,parent=node)
@@ -118,7 +104,6 @@ class MyAgent666(Snake):
             newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
             neighbours.append(newnode)
 
-        print("NEIGBOURS: " + str([str(a) for a in neighbours]))
         return neighbours
     def getValidDirs(self,node,maze):       
         position=node.get_pos()
@@ -131,11 +116,12 @@ class MyAgent666(Snake):
 
     def getValidDirsDiag(self,node,maze):       
         position=node.get_pos()
-
         diagComplement =[(up,(-1,1)), (up, (1,1)) , (down, (1,-1)), (down, (-1,-1)), (left, (1, 1)), (left, (1, -1)), (right, (-1,1)), (right, (-1, -1))]
         diagDirections = [(1,1),(1,-1),(-1,1),(-1,-1)]
-        invaliddir = [x for (x,y) in diagComplement if y == node.dir]
+        invaliddir = [y for (x,y) in diagComplement if x == node.dir]
         validdir = [dir for dir in diagDirections if not ( dir in invaliddir )]
+
+        print(str(validdir))
 
         return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body]
 
