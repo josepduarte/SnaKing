@@ -17,7 +17,10 @@ class MyAgent666(Snake):
     def add(self,a,b):
         return (a[0]+b[0])%60,(a[1]+b[1])%40
     def update(self,points=None, mapsize=None, count=None,agent_time=None):
-        pass
+        #self.points=points
+        self.mapsize=mapsize
+        self.count=count
+        self.agent_time=agent_time
     def updateDirection(self,maze):
         olddir=self.direction
         position=self.body[0]
@@ -33,6 +36,7 @@ class MyAgent666(Snake):
         #opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
         #if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
         #    self.direction=olddir
+        """
         if(shortest>25):
             for dir in validdir:
                 newpos=self.add(position,dir)
@@ -42,9 +46,11 @@ class MyAgent666(Snake):
                     shortest=newlen
             self.direction=olddir 
         else:
-            path = self.aa(position, self.direction, maze)
-            dir = path[-1].dir
-            self.direction = dir # if self.path está por segurança 
+        """
+        print(self.agent_time)
+        path = self.aa(position, self.direction, maze)
+        dir = path[-1].dir if path else olddir
+        self.direction = dir # if self.path está por segurança 
 
     
     def aa(self,startPos, startDir, maze):

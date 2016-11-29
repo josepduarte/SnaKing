@@ -1,6 +1,7 @@
 from game import *
 from agent1 import Agent1
 from maze import Maze
+from snake_666 import MyAgent666
 import importlib
 import asyncio
 import websockets
@@ -16,8 +17,8 @@ def main(argv):
     network = False
     url = 'ws://localhost:8765' 
     url = None
-    StudentAgent = Agent1
-    studentAgent_name = "Agent1"
+    StudentAgent = MyAgent666
+    studentAgent_name = "Agent666"
     student_url = None
     OponentAgent = Agent1
     oponentAgent_name = "Agent1"
