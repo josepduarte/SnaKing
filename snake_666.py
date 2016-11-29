@@ -33,14 +33,14 @@ class MyAgent666(Snake):
         #opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
         #if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
         #    self.direction=olddir
-        if(shortest>30):
+        if(shortest>25):
             for dir in validdir:
                 newpos=self.add(position,dir)
                 newlen=self.pathlen(newpos , maze.foodpos)#length in shortest path
                 if newlen < shortest:
                     olddir=dir
                     shortest=newlen
-            self.direction=olddir  
+            self.direction=olddir 
         else:
             path = self.aa(position, self.direction, maze)
             dir = path[-1].dir
@@ -54,7 +54,8 @@ class MyAgent666(Snake):
         openNodes=[]
         closedNodes=[]
         openNodes.append(startNode)
-
+        
+        
         while openNodes!=[]:
             currentNode = openNodes[0]
              
@@ -68,8 +69,8 @@ class MyAgent666(Snake):
         
             if currentNode == targetNode:
                return self.retracePath(startNode,currentNode)
-
-            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
+            
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
 
@@ -83,7 +84,8 @@ class MyAgent666(Snake):
 
     def getNeighbours(self,node,foodNode,maze):
         neighbours = []
-        for dir in self.getValidDirs(node,maze):
+        validdirs = self.getValidDirs(node,maze) 
+        for dir in validdirs:
             coord = self.add((node.x,node.y),dir)
             newnode = Node(coord, dir=dir,gCost=node.gCost+1,parent=node)
             newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
@@ -100,10 +102,10 @@ class MyAgent666(Snake):
                     dir = up
                 else:
                     dir = down
-            newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node)
-            newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
-            neighbours.append(newnode)
-
+            if dir in validdirs:
+                newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node)
+                newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
+                neighbours.append(newnode)  
         return neighbours
     def getValidDirs(self,node,maze):       
         position=node.get_pos()
@@ -112,7 +114,7 @@ class MyAgent666(Snake):
         invaliddir=[x for (x,y) in complement if y==node.dir]
         validdir = [dir for dir in directions if not ( dir in invaliddir )]
 
-        return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+        return [dir for dir in validdir if not self.add(position,dir) in maze.obstacles and not self.add(position,dir) in maze.playerpos and not self.add(position,dir) in self.body] #verificar se não vai contra o corpo
 
     def getValidDirsDiag(self,node,maze):       
         position=node.get_pos()
@@ -121,7 +123,7 @@ class MyAgent666(Snake):
         invaliddir = [y for (x,y) in diagComplement if x == node.dir]
         validdir = [dir for dir in diagDirections if not ( dir in invaliddir )]
 
-        return [dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body]
+        return [dir for dir in validdir if not self.add(position,dir) in maze.obstacles and not self.add(position,dir) in maze.playerpos and not self.add(position,dir) in self.body]
 
 class Node:
     def __init__(self,coord,dir=(0,0), gCost=0, hCost=0, parent=None):
