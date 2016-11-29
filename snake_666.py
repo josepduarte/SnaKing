@@ -1,6 +1,7 @@
 from snake import Snake
 from constants import *
 import math
+import pygame
 
 class MyAgent666(Snake):
     def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
@@ -22,6 +23,8 @@ class MyAgent666(Snake):
         self.count=count
         self.agent_time=agent_time
     def updateDirection(self,maze):
+        begin_time = pygame.time.get_ticks();
+
         olddir=self.direction
         position=self.body[0]
         
@@ -48,12 +51,12 @@ class MyAgent666(Snake):
         else:
         """
         print(self.agent_time)
-        path = self.aa(position, self.direction, maze)
+        path = self.aa(position, self.direction, maze, begin_time)
         dir = path[-1].dir if path else olddir
         self.direction = dir # if self.path está por segurança 
 
     
-    def aa(self,startPos, startDir, maze):
+    def aa(self,startPos, startDir, maze, begin_time):
         startNode=Node(startPos, dir=startDir)
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
@@ -73,7 +76,7 @@ class MyAgent666(Snake):
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
         
-            if currentNode == targetNode:
+            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
