@@ -52,9 +52,10 @@ class Agent_jps(Snake):
             self.direction=olddir 
         else:
         """
-        print(self.agent_time)
+        #print(self.agent_time)
         path = self.jps_astar(position, self.direction, maze, begin_time)
-        dir = path[-1].dir if path else olddir
+        print("PATH: " + str(path))
+        dir = path[-1].dir if path and path[-1].dir in validdir else olddir
         self.direction = dir # if self.path está por segurança 
 
     
@@ -149,13 +150,12 @@ class Agent_jps(Snake):
         openNodes=[]
         closedNodes=[]
 
-        # start node can be considered closed already
-        closedNodes.append(startNode)
-
         # get the neighbours of start node
-        for n in self.getNeighbours(startNode, targetNode, maze):
+        for n in self.getNeighbours(startNode, targetNode, maze):#otimizar 
             if n not in closedNodes and n not in openNodes:
                 openNodes.append(n)
+
+        closedNodes.append(startNode) 
 
         # start jps algorithm
         while openNodes:
@@ -169,7 +169,12 @@ class Agent_jps(Snake):
             openNodes.remove(currentNode)
             closedNodes.append(currentNode)
 
-
+            
+            # get the neighbours of the current node
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
+                if n not in closedNodes and n not in openNodes:
+                    openNodes.append(n)
+            
             if currentNode == targetNode:
                return self.retracePath(startNode,currentNode)
 
@@ -179,15 +184,15 @@ class Agent_jps(Snake):
             if self.found_food_in_jps:
                 return self.retracePath(startNode,currentNode)
 
+            #print("NODE: " + str(node))
             if node and node not in closedNodes and node not in openNodes:
                 openNodes.append(node)
 
 
     def expand_node(self, currentNode, targetNode, maze):
         temp_node = currentNode
-        print("NODE EXPANDED: " + str(currentNode))
         if temp_node.dir == right or temp_node.dir == left:
-            while(temp_node.get_pos() not in maze.playerpos and temp_node.get_pos() not in maze.obstacles):
+            while(temp_node.get_pos() not in maze.playerpos and temp_node.get_pos() not in maze.obstacles and temp_node != currentNode):
                 if temp_node == targetNode:
                     self.found_food_in_jps = True
                     return currentNode
@@ -196,17 +201,13 @@ class Agent_jps(Snake):
                 temp_node = Node(self.add(temp_node.get_pos(), temp_node.dir), temp_node.dir, temp_node.gCost+1, self.pathlen((temp_node.x,temp_node.y),(targetNode.x,targetNode.y)) ,currentNode)
 
         elif temp_node.dir == up or temp_node.dir == down:
-             while(temp_node.get_pos() not in maze.playerpos and temp_node.get_pos() not in maze.obstacles):
+             while(temp_node.get_pos() not in maze.playerpos and temp_node.get_pos() not in maze.obstacles and temp_node != currentNode):
                 if temp_node == targetNode:
                     self.found_food_in_jps = True
                     return currentNode
                 if self.add(temp_node.get_pos(), left) in maze.obstacles or self.add(temp_node.get_pos(), right) in maze.obstacles or self.add(temp_node.get_pos(), left) in maze.playerpos or self.add(temp_node.get_pos(), right) in maze.playerpos:
                     return temp_node
-               # print("============================================")
-              #  print("Temp node BEFORE: " + str(temp_node.get_pos()))
                 temp_node = Node(self.add(temp_node.get_pos(), temp_node.dir), temp_node.dir, temp_node.gCost+1, self.pathlen((temp_node.x,temp_node.y),(targetNode.x,targetNode.y)) ,currentNode)
-               # print("Temp node AFTER: " + str(temp_node.get_pos()))
-              #  print("============================================")
 
 class Node:
     def __init__(self,coord,dir=(0,0), gCost=0, hCost=0, parent=None):

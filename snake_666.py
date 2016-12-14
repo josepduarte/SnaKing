@@ -50,11 +50,9 @@ class MyAgent666(Snake):
             self.direction=olddir 
         else:
         """
-        print(self.agent_time)
         path = self.aa(position, self.direction, maze, begin_time)
-        dir = path[-1].dir if path else olddir
+        dir = path[-1].dir if path and path[-1].dir in validdir else olddir
         self.direction = dir # if self.path está por segurança 
-
     
     def aa(self,startPos, startDir, maze, begin_time):
         startNode=Node(startPos, dir=startDir)
@@ -76,7 +74,7 @@ class MyAgent666(Snake):
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
         
-            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
+            if currentNode == targetNode :#or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
