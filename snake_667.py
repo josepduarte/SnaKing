@@ -3,10 +3,14 @@ from constants import *
 import math
 import pygame
 
-class MyAgent666(Snake):
+class MyAgent667(Snake):
     def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
         super().__init__(body,direction,name=name)
         self.path = []
+        #self.openNodes = []
+        self.closedNodes = []
+        self.temp_len_players_positions = None
+
     def pathlen(self,a,b):
         distX = abs(a[0]-b[0])
         distY = abs(a[1]-b[1])
@@ -24,6 +28,15 @@ class MyAgent666(Snake):
         self.agent_time=agent_time
     def updateDirection(self,maze):
         begin_time = pygame.time.get_ticks();
+
+
+        temp_len = self.temp_len_players_positions
+        self.temp_len_players_positions = len(maze.playerpos)
+        if temp_len != self.temp_len_players_positions:
+            self.closedNodes = []
+            self.openNodes = []
+
+            
 
         olddir=self.direction
         position=self.body[0]
@@ -58,10 +71,11 @@ class MyAgent666(Snake):
         startNode=Node(startPos, dir=startDir)
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
-        openNodes=[]
-        closedNodes=[]
+        openNodes= self.closedNodes if self.closedNodes else []
+        #closedNodes=[]
         openNodes.append(startNode)
-        
+
+        #print("BLAAAAA: " + str(openNodes))
         
         while openNodes!=[]:
             currentNode = openNodes[0]
@@ -72,13 +86,14 @@ class MyAgent666(Snake):
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
-            closedNodes.append(currentNode)
+            self.closedNodes.append(currentNode)
         
             if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
-               return self.retracePath(startNode,currentNode)
+                openNodes.append(currentNode)
+                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
-                if n not in closedNodes and n not in openNodes:
+                if n not in self.closedNodes and n not in openNodes:
                     openNodes.append(n)
 
     def retracePath(self,startNode, endNode):
@@ -86,6 +101,7 @@ class MyAgent666(Snake):
         currentNode = endNode
         while currentNode != startNode:
             path.append(currentNode)
+            #self.openNodes.append(currentNode)
             currentNode = currentNode.parent
         return path #if path else [startNode]
 

@@ -2,6 +2,9 @@ from game import *
 from agent1 import Agent1
 from maze import Maze
 from snake_666 import MyAgent666
+from snake_667 import MyAgent667
+from snake_668 import MyAgent668
+from snake_astar_w_jps import Agent_jps
 import importlib
 import asyncio
 import websockets

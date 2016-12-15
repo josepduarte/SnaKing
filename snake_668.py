@@ -3,10 +3,13 @@ from constants import *
 import math
 import pygame
 
-class MyAgent666(Snake):
+class MyAgent668(Snake):
     def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
         super().__init__(body,direction,name=name)
         self.path = []
+        self.last = None
+        self.temp_len_players_positions = None
+
     def pathlen(self,a,b):
         distX = abs(a[0]-b[0])
         distY = abs(a[1]-b[1])
@@ -24,6 +27,11 @@ class MyAgent666(Snake):
         self.agent_time=agent_time
     def updateDirection(self,maze):
         begin_time = pygame.time.get_ticks();
+
+        temp_len = self.temp_len_players_positions
+        self.temp_len_players_positions = len(maze.playerpos)
+        if temp_len != self.temp_len_players_positions:
+            self.last = None
 
         olddir=self.direction
         position=self.body[0]
@@ -55,13 +63,16 @@ class MyAgent666(Snake):
         self.direction = dir # if self.path está por segurança 
     
     def aa(self,startPos, startDir, maze, begin_time):
-        startNode=Node(startPos, dir=startDir)
+
+        startNode= Node(startPos, dir=startDir) if not self.last else self.last
+
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
         openNodes=[]
         closedNodes=[]
         openNodes.append(startNode)
         
+        print("111111111: " + str(startNode))
         
         while openNodes!=[]:
             currentNode = openNodes[0]
@@ -69,6 +80,8 @@ class MyAgent666(Snake):
             for node in openNodes:
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
+
+            print("222222222222: " + str(currentNode))
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
@@ -83,6 +96,7 @@ class MyAgent666(Snake):
 
     def retracePath(self,startNode, endNode):
         path=[]
+        self.last = endNode
         currentNode = endNode
         while currentNode != startNode:
             path.append(currentNode)

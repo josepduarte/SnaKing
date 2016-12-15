@@ -52,9 +52,7 @@ class Agent_jps(Snake):
             self.direction=olddir 
         else:
         """
-        #print(self.agent_time)
         path = self.jps_astar(position, self.direction, maze, begin_time)
-        print("PATH: " + str(path))
         dir = path[-1].dir if path and path[-1].dir in validdir else olddir
         self.direction = dir # if self.path está por segurança 
 
@@ -175,7 +173,7 @@ class Agent_jps(Snake):
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
             
-            if currentNode == targetNode:
+            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
                return self.retracePath(startNode,currentNode)
 
             # expand (using jps algorithm) the best node 
