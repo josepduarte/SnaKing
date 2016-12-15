@@ -173,7 +173,7 @@ class Agent_jps(Snake):
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
             
-            if currentNode == targetNode:
+            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
                return self.retracePath(startNode,currentNode)
 
             # expand (using jps algorithm) the best node 
