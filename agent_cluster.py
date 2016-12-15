@@ -95,11 +95,26 @@ class Agent_cluster(Snake):
 
         if self.path!=[] and self.closedNodes!=[]:
             self.path=self.aa(position, self.direction, maze, begin_time)
-            print("&")
-            print(position, self.path[-1])
-            dir = self.path[-1*self.cont].dir if self.path else olddir
-            self.direction = dir # if self.path está por segurança
-            #print(self.cont, len(path))
+            #print("&")
+            #print(position, self.path[-1])
+            ver=False
+
+            for x in self.path:
+                #print(x.get_pos()==position)
+                if x.get_pos()==position:
+                    dir=x.dir
+                    ver=True
+                    break
+            if not ver:
+                self.openNodes=[]
+                self.closedNodes=[]
+                self.cont=1
+
+                self.path = self.aa(position, self.direction, maze, begin_time)
+
+                dir = self.path[-1].dir if self.path else olddir
+                self.direction = dir # if self.path está por segurança
+
             self.cont+=1  # erro a usar isto. porquê?
         else:
             self.cont=1
@@ -185,6 +200,8 @@ class Agent_cluster(Snake):
         while currentNode != startNode:
             path.append(currentNode)
             currentNode = currentNode.parent
+        print("----")
+        dd=[print(x) for x in path]
         return path #if path else [startNode]
 
     def getNeighbours(self,node,foodNode,maze):
