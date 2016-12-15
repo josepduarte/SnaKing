@@ -97,7 +97,7 @@ class Agent_cluster(Snake):
             self.path=self.aa(position, self.direction, maze, begin_time)
             print("&")
             print(position, self.path[-1])
-            dir = self.path[-1*cont].dir if self.path else olddir
+            dir = self.path[-1*self.cont].dir if self.path else olddir
             self.direction = dir # if self.path está por segurança
             #print(self.cont, len(path))
             self.cont+=1  # erro a usar isto. porquê?
