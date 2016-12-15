@@ -74,7 +74,6 @@ class MyAgent666(Snake):
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
         
-            if currentNode == targetNode :#or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 

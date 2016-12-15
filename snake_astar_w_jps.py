@@ -52,9 +52,7 @@ class Agent_jps(Snake):
             self.direction=olddir 
         else:
         """
-        #print(self.agent_time)
         path = self.jps_astar(position, self.direction, maze, begin_time)
-        print("PATH: " + str(path))
         dir = path[-1].dir if path and path[-1].dir in validdir else olddir
         self.direction = dir # if self.path está por segurança 
 
