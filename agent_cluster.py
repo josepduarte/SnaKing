@@ -10,7 +10,7 @@ class Agent_cluster(Snake):
         self.lastPlayerlen=None
         self.foodpos=None
         self.path=[]
-        self.cont=1
+        self.first=True
     # def pathlen(self,a,b):
     #     return int( ((a[0]-b[0])**2 + (a[1]-b[1])**2 )**0.5)
     def add(self,a,b):
@@ -106,18 +106,14 @@ class Agent_cluster(Snake):
                     ver=True
                     break
             if not ver:
+                print("UPS")
                 self.openNodes=[]
                 self.closedNodes=[]
-                self.cont=1
-
                 self.path = self.aa(position, self.direction, maze, begin_time)
 
                 dir = self.path[-1].dir if self.path else olddir
                 self.direction = dir # if self.path está por segurança
-
-            self.cont+=1  # erro a usar isto. porquê?
         else:
-            self.cont=1
             ##isto é o normal sem o if anterior e tirar o self.path para path
             self.path = self.aa(position, self.direction, maze, begin_time)
         # else:
@@ -171,26 +167,28 @@ class Agent_cluster(Snake):
             self.startNode=Node(startPos, dir=startDir)
             self.startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
             self.openNodes.append(self.startNode)
-
+            self.first=True
 
         while self.openNodes!=[]:
-            currentNode = self.openNodes[0]
+            if self.first:
+                self.currentNode = self.openNodes[0]
 
-            for node in self.openNodes:
-                if node.fCost() < currentNode.fCost():
-                    currentNode = node
+                for node in self.openNodes:
+                    if node.fCost() < self.currentNode.fCost():
+                        self.currentNode = node
 
-            if currentNode in self.openNodes:
-                self.openNodes.remove(currentNode)
-            self.closedNodes.append(currentNode)
-            if  (pygame.time.get_ticks() - begin_time > self.agent_time):
-                return self.retracePath(self.startNode,currentNode)
-            elif currentNode == targetNode: #or clusterId!=self.calculateClusterId(currentNode.get_pos())):
-               self.openNodes=[]
-               self.closedNodes=[]
-               return self.retracePath(self.startNode,currentNode)
-
-            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
+                if self.currentNode in self.openNodes:
+                    self.openNodes.remove(self.currentNode)
+                self.closedNodes.append(self.currentNode)
+                if  (pygame.time.get_ticks() - begin_time > self.agent_time):
+                    self.first=False
+                    return self.retracePath(self.startNode,self.currentNode)
+                elif self.currentNode == targetNode: #or clusterId!=self.calculateClusterId(currentNode.get_pos())):
+                   self.openNodes=[]
+                   self.closedNodes=[]
+                   return self.retracePath(self.startNode,self.currentNode)
+            self.first=True
+            for n in self.getNeighbours(self.currentNode, targetNode, maze):#otimizar
                 if n not in self.closedNodes and n not in self.openNodes:
                     self.openNodes.append(n)
 
