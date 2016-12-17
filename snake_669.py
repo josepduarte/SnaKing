@@ -50,21 +50,13 @@ class MyAgent669(Snake):
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
         
-        #opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
-        #if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
-        #    self.direction=olddir
-        """
-        if(shortest>25):
-            for dir in validdir:
-                newpos=self.add(position,dir)
-                newlen=self.pathlen(newpos , maze.foodpos)#length in shortest path
-                if newlen < shortest:
-                    olddir=dir
-                    shortest=newlen
-            self.direction=olddir 
-        else:
-        """
-        # avoid food
+        opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
+        
+        # avoid if enemy is considerable closer than us
+        if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 5 < shortest):
+            print("AVOID")
+            self.direction=olddir
+        # avoid food if we are +5 larger than enemy
         if len(self.body) > (len(maze.playerpos) - len(self.body) + 5):
             print("AVOID")
             self.direction = olddir
