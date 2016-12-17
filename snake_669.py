@@ -64,8 +64,13 @@ class MyAgent669(Snake):
             self.direction=olddir 
         else:
         """
+        # avoid food
+        if len(self.body) > (len(maze.playerpos) - len(self.body) + 5):
+            print("AVOID")
+            self.direction = olddir
         # astar saving the path
-        if shortest > 5:
+        elif shortest > 5:
+            print("FIGHT FOR IT")
             path = self.aa_improved(position, self.direction, maze, begin_time)
             if path and path[-1].dir in validdir:
                 dir = path[-1].dir
@@ -77,6 +82,7 @@ class MyAgent669(Snake):
             self.direction = dir # if self.path está por segurança 
         # regular astart
         else:
+            print("CLOSE")
             path = self.aa_regular(position, self.direction, maze, begin_time)
             self.direction = path[-1].dir if path and path[-1].dir in validdir else olddir
     
@@ -111,15 +117,15 @@ class MyAgent669(Snake):
 
     def aa_improved(self,startPos, startDir, maze, begin_time):
         if self.food_found:
-            print("bla1")
+          #  print("bla1")
             return self.retracePath(Node(startPos),self.last)
         if self.last:
-            print("bla2")
+          #  print("bla2")
             startNode = self.last
             if self.last in self.closedNodes:
                 self.closedNodes.remove(self.last) 
         else:
-            print("bla3")
+          #  print("bla3")
             startNode=Node(startPos, dir=startDir)
 
         targetNode=Node(maze.foodpos)
@@ -155,9 +161,9 @@ class MyAgent669(Snake):
         path=[]
         currentNode = endNode
         self.last = endNode
-        print("startNode: " + str(startNode))
+       # print("startNode: " + str(startNode))
         while currentNode != startNode:
-            print("currentNode: " + str(currentNode))
+        #    print("currentNode: " + str(currentNode))
             path.append(currentNode)
             currentNode = currentNode.parent
         return path #if path else [startNode]
@@ -198,7 +204,7 @@ class MyAgent669(Snake):
         invaliddir=[x for (x,y) in complement if y==node.dir]
         validdir = [dir for dir in directions if not ( dir in invaliddir )]
 
-        return [dir for dir in validdir if not self.add(position,dir) in maze.obstacles and not self.add(position,dir) in maze.playerpos and not self.add(position,dir) in self.body] #verificar se não vai contra o corpo
+        return [dir for dir in validdir if not self.add(position,dir) in maze.obstacles and not self.add(position,dir) in maze.playerpos] #verificar se não vai contra o corpo
 
     def getValidDirsDiag(self,node,maze):       
         position=node.get_pos()
