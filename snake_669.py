@@ -64,24 +64,60 @@ class MyAgent669(Snake):
             self.direction=olddir 
         else:
         """
-        path = self.aa(position, self.direction, maze, begin_time)
-        if path and path[-1].dir in validdir:
-            dir = path[-1].dir
+        # astar saving the path
+        if shortest > 5:
+            path = self.aa_improved(position, self.direction, maze, begin_time)
+            if path and path[-1].dir in validdir:
+                dir = path[-1].dir
+            else:
+                dir = olddir
+                self.last = None
+                self.closedNodes = []
+                self.food_found = False
+            self.direction = dir # if self.path está por segurança 
+        # regular astart
         else:
-            dir = olddir
-            self.last = None
-            self.closedNodes = []
-            self.food_found = False
-        self.direction = dir # if self.path está por segurança 
+            path = self.aa_regular(position, self.direction, maze, begin_time)
+            self.direction = path[-1].dir if path and path[-1].dir in validdir else olddir
     
-    def aa(self,startPos, startDir, maze, begin_time):
+
+    def aa_regular(self,startPos, startDir, maze, begin_time):
+        startNode=Node(startPos, dir=startDir)
+        targetNode=Node(maze.foodpos)
+        startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
+        openNodes=[]
+        closedNodes=[]
+        openNodes.append(startNode)
+        
+        
+        while openNodes!=[]:
+            currentNode = openNodes[0]
+             
+            for node in openNodes:
+                if node.fCost() < currentNode.fCost():
+                    currentNode = node
+
+            if currentNode in openNodes:
+                openNodes.remove(currentNode)
+            closedNodes.append(currentNode)
+        
+            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.05):
+               return self.retracePath(startNode,currentNode)
+            
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
+                if n not in closedNodes and n not in openNodes:
+                    openNodes.append(n)
+
+
+    def aa_improved(self,startPos, startDir, maze, begin_time):
         if self.food_found:
             print("bla1")
             return self.retracePath(Node(startPos),self.last)
         if self.last:
             print("bla2")
             startNode = self.last
-            self.closedNodes.remove(self.last)
+            if self.last in self.closedNodes:
+                self.closedNodes.remove(self.last) 
         else:
             print("bla3")
             startNode=Node(startPos, dir=startDir)
