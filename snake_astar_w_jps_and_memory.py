@@ -63,7 +63,7 @@ class Agent_jps_memory(Snake):
                 self.lastPlayerlen=len(maze.playerpos)
                 self.openNodes=[]
                 self.closedNodes=[]
-            elif self.pathlen(position,maze.foodpos)<5:
+            elif self.pathlen(position,maze.foodpos)<2:
                 self.openNodes=[]
                 self.closedNodes=[]
             elif self.foodpos==None:
@@ -179,6 +179,7 @@ class Agent_jps_memory(Snake):
             self.openNodes=[]
             self.closedNodes=[]
             self.first=True
+            print("reset")
 
 
         if self.first:
