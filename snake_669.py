@@ -107,9 +107,9 @@ class MyAgent669(Snake):
             
             if currentNode == targetNode:
                 self.food_found = True
-                return self.retracePath(startNode,currentNode)
+                return self.retracePath(Node(startPos),currentNode)
             if pygame.time.get_ticks() - begin_time > self.agent_time - 0.05:
-                return self.retracePath(startNode,currentNode)
+                return self.retracePath(Node(startPos),currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
                 if n not in self.closedNodes and n not in openNodes:
@@ -119,7 +119,9 @@ class MyAgent669(Snake):
         path=[]
         currentNode = endNode
         self.last = endNode
+        print("startNode: " + str(startNode))
         while currentNode != startNode:
+            print("currentNode: " + str(currentNode))
             path.append(currentNode)
             currentNode = currentNode.parent
         return path #if path else [startNode]
