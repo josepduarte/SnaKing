@@ -67,11 +67,11 @@ class MyAgent669(Snake):
         path = self.aa(position, self.direction, maze, begin_time)
         if path and path[-1].dir in validdir:
             dir = path[-1].dir
+        else:
+            dir = olddir
             self.last = None
             self.closedNodes = []
             self.food_found = False
-        else:
-            dir = olddir
         self.direction = dir # if self.path está por segurança 
     
     def aa(self,startPos, startDir, maze, begin_time):
