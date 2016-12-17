@@ -1,0 +1,8 @@
+Ideas still to implement:
+	- calcular o caminho para fora da comida
+	- se a cobra adversária se puder movimentar para a mesma posição que nós pretendemos:
+		- se tivermos mais pontos:
+			 vamos para essa posição
+		- se não:
+			 mudamos
+	- 
