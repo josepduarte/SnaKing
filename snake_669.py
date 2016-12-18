@@ -99,7 +99,7 @@ class MyAgent669(Snake):
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
         
-            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time):
+            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0,5):
                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
@@ -142,7 +142,7 @@ class MyAgent669(Snake):
             if currentNode == targetNode:
                 self.food_found = True
                 return self.retracePath(Node(startPos),currentNode)
-            if pygame.time.get_ticks() - begin_time > self.agent_time - 0.05:
+            if pygame.time.get_ticks() - begin_time > self.agent_time - 0.5:
                 return self.retracePath(Node(startPos),currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
