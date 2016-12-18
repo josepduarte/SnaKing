@@ -25,7 +25,7 @@ class Player:
         self.head_color = (int(r+(255-r)*f), int(g+(255-g)*f), int(b+(255-b)*f))
         self.IsDead = False
         self.points = 0
-        self.latency = 2 #slack for students :)
+        self.latency = 0 
     def kill(self):
         if not self.IsDead:
             self.IsDead = True
@@ -97,15 +97,19 @@ class SnakeGame:
    
     def loadMap(self, filename=None):
         if filename != None:
+            logging.info("Loading {} ...".format(filename))
             image = pygame.image.load(filename)
             pxarray = pygame.PixelArray(image)
             for x in range(len(pxarray)):
                 for y in range(len(pxarray[x])):
-                    if pxarray[x][y] == 0xFF00F900:
+                    p = pxarray[x][y] & 0xFFFFFFFF #fix signed/unsigned
+                    if not p in [0xFF00F900, 0xFFFF2600, 0xFFAA7942, 0xFF000000, 0xFFFFFFFF, 0]: #food, player, wall, oldwall, empty, oldempty 
+                        logging.error("UNKNOWN: {:02X}".format(p))
+                    if p == 0xFF00F900:
                         self.foodfield.append((x,y))
-                    elif pxarray[x][y] == 0xFFFF2600:
+                    elif p == 0xFFFF2600:
                         self.playerfield.append((x,y))
-                    elif pxarray[x][y] != 0: 
+                    elif p in [0xFFAA7942, 0xFF000000]: 
                         self.obstacles.append((x, y))
             return True
         return False
@@ -182,7 +186,8 @@ class SnakeGame:
             if not player.agent.IsDead:
                 self.playerpos+=player.body
             try:
-                player.agent.update(points=[(a.name, a.points) for a in self.players], mapsize=(self.hortiles, self.verttiles), count=self.count, agent_time=1000*(1/self.fps)/2) #update game logic (only for alive players)
+                b = lambda x: x.agent.update(points=[(a.name, a.points) for a in self.players], mapsize=(self.hortiles, self.verttiles), count=self.count, agent_time=1000*(1/self.fps)/2) #update game logic (only for alive players)
+                self.timekeep(player, b)
             except Exception as error:
                 logging.error(str(error))
                 player.kill()
@@ -191,6 +196,19 @@ class SnakeGame:
        snake.kill()
        self.updatePlayerInfo()
        self.dead.append(snake)
+
+    def timekeep(self, player, block):
+        s = pygame.time.get_ticks()
+        timespent = block(player) 
+        if timespent == None:
+            timespent = 0
+        f = pygame.time.get_ticks() 
+        if timespent > 0:
+            logging.debug("({})\ttimedif={}\t\ttimespent={}".format(player.name, f-s,timespent))
+
+        if timespent > 1000*(1/self.fps)/2:
+            logging.debug("Player <{}> took {}".format(player.name, timespent))
+            player.point(-10)   #we penalize players that take longer then a half a tick
 
     def update(self,snake):
         #updates the snake...
@@ -267,17 +285,10 @@ class SnakeGame:
                 try:
                     if player.name == "":
                         sys.exit(1) #player couldn't be initialized
-                    if isinstance(player.agent, NetAgent) and self.count%100==1:
-                        player.latency = player.agent.ping()
 
                     maze = Maze(self.obstacles, self.playerpos, self.foodpos)   #just a copy of our information (avoid shameful agents that tinker with the game server)
-                    s = pygame.time.get_ticks()
-                    player.latency = player.agent.updateDirection(maze) #update game logic (only for alive players)
-                    f = pygame.time.get_ticks() - (player.latency if player.latency != None else 0)
-                
-                    if f-s > 1000*(1/self.fps)/2:
-                        logging.debug("Player <{}> took {}".format(player.name, f-s))
-                        player.point(-10)   #we penalize players that take longer then a half a tick
+                    b = lambda x: x.agent.updateDirection(maze)
+                    self.timekeep(player, b)
                 except Exception as error:
                     logging.error(str(error))
                     player.kill()

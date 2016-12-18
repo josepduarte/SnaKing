@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import random
 import subprocess
 import queue
 import asyncio
@@ -8,7 +9,7 @@ import sys
 import logging
 import sqlite3
 
-logging.basicConfig(format=':%(levelname)s:%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO, datefmt='%m-%d %H:%M')
 proxy = dict() 
 agent = dict()
 conn = sqlite3.connect('scores.db')
@@ -16,10 +17,12 @@ sql = "CREATE TABLE IF NOT EXISTS scores (game STRING PRIMARY KEY, t TIMESTAMP D
 c = conn.cursor()
 c.execute(sql)
 conn.commit()
+conn.close()
+
 q = queue.Queue()
 
 async def agentserver(websocket, path):
-    global proxy, agent,conn
+    global proxy, agent
     score = None
     gameid = None
     try:
@@ -33,8 +36,9 @@ async def agentserver(websocket, path):
             if q.qsize() > 1:
                 p1 = q.get()
                 p2 = q.get()
-	        if len(sys.argv) > 2 and sys.argv[2] == "game" and p1 != p2:
-                    subprocess.Popen("python3 start.py -s NetAgent,{},ws://localhost:{} -o NetAgent,{},ws://localhost:{} --disable-video".format(p1, sys.argv[1], p2, sys.argv[1]).split())
+                if len(sys.argv) > 2 and sys.argv[2] == "game" and p1 != p2 and agent[p1] != None and agent[p2] != None:
+                    mapa = random.choice(["mapa1.bmp","mapa2.bmp","qualify1.bmp"])
+                    subprocess.Popen("python3 start.py -s NetAgent,{},ws://localhost:{} -o NetAgent,{},ws://localhost:{} --disable-video -m {}".format(p1, sys.argv[1], p2, sys.argv[1], mapa).split())
                 if p1 == p2:
                     q.put(p1) #put player back into queue
             while True:
@@ -44,7 +48,7 @@ async def agentserver(websocket, path):
         elif msg['cmd'] == 'PROXY':
             proxy[name] = websocket
             gameid = msg['gameid']
-            if agent[name] == None:
+            if name not in agent or agent[name] == None:
                 logging.error("Agent must connect before Proxy")
                 proxy[name].send("CLOSE")
                 proxy[name].close()
@@ -70,10 +74,12 @@ async def agentserver(websocket, path):
             agent[name] = None
         if score != None and gameid != None:   #we only commit score in one of the sides (else we would insert 2x)
             try:
+                conn = sqlite3.connect('scores.db')
                 c = conn.cursor()
                 c.execute('INSERT INTO scores (game, player1, player1_score, player2, player2_score) VALUES (?,?,?,?,?)', (gameid, score[0][0], score[0][1], score[1][0], score[1][1] ))
                 logging.info("GAME<{}>\t{}({}) vs {}({})".format(gameid,score[0][0], score[0][1], score[1][0], score[1][1]))
                 conn.commit()
+                conn.close()
             except sqlite3.IntegrityError as error:
                 pass #ignore since both agents will try to insert the score
 
