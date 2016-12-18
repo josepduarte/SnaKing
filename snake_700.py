@@ -66,11 +66,17 @@ class MyAgent700(Snake):
         if(self.pathlen(enemy_head,maze.foodpos) + 5 < shortest):
            # print("AVOID")
             self.direction=olddir
+            self.last = None
+            self.closedNodes = []
+            self.food_found = False
           #  print("DIR1: " + str(self.direction))
         # avoid food if we are +5 larger than enemy
         if len(self.body) > (len(maze.playerpos) - len(self.body) + 200):
            # print("AVOID 2")
             self.direction = olddir
+            self.last = None
+            self.closedNodes = []
+            self.food_found = False
         # astar saving the path
         elif shortest > 5:
            # print("FIGHT FOR IT")
@@ -89,6 +95,9 @@ class MyAgent700(Snake):
         # regular astart
         else:
           #  print("CLOSE")
+            self.last = None
+            self.closedNodes = []
+            self.food_found = False
             path = self.aa_regular(position, self.direction, maze, begin_time)
             self.direction = path[-1].dir if path and path[-1].dir in validdir else olddir
          #   print("DIR3: " + str(self.direction))
