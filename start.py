@@ -17,7 +17,7 @@ import sys, getopt
 def main(argv):
     inputfile = None
     visual = True
-    network = False
+    agentproxy = False
     url = 'ws://localhost:8765' 
     url = None
     StudentAgent = MyAgent666
@@ -41,7 +41,7 @@ def main(argv):
         elif opt in ("--disable-video"):
             visual = False 
         elif opt in ("-p", "--proxy"):
-            network = True
+            agentproxy = True
         elif opt in ("-s", "--student-agent"):
             a = arg.split(',')
             classmodule = importlib.import_module(a[0].lower())
@@ -59,7 +59,7 @@ def main(argv):
             if len(a) > 2:
                 oponent_url = a[2]
 
-    if network:
+    if agentproxy:
         if student_url == None:
             print("Must specify --student-agent Agent,name,websocket")
             sys.exit(1)
@@ -67,16 +67,17 @@ def main(argv):
         asyncio.get_event_loop().run_until_complete(proxy(student_url,StudentAgent, studentAgent_name))
     else:
         try:
-            snake=SnakeGame(hor=60, ver=40, fps=20, visual=visual, obstacles=15, mapa=inputfile)
-            snake.setPlayers([  
-                StudentAgent([snake.playerPos()], name=studentAgent_name) if student_url == None else StudentAgent([snake.playerPos()], name=studentAgent_name, url=student_url),
-                OponentAgent([snake.playerPos()], name=oponentAgent_name) if oponent_url == None else OponentAgent([snake.playerPos()], name=oponentAgent_name, url=oponent_url),
+            game=SnakeGame(hor=60, ver=40, fps=20, visual=visual, obstacles=15, mapa=inputfile)
+            print("Launching game <{}>".format(game.gameid))
+            game.setPlayers([  
+                StudentAgent([game.playerPos()], name=studentAgent_name) if student_url == None else StudentAgent([game.playerPos()], name=studentAgent_name, url=student_url,gameid=game.gameid),
+                OponentAgent([game.playerPos()], name=oponentAgent_name) if oponent_url == None else OponentAgent([game.playerPos()], name=oponentAgent_name, url=oponent_url,gameid=game.gameid),
             ])
         except Exception as e:
             print(e)
             sys.exit(1)
         
-        snake.start()
+        game.start()
 
 async def proxy(url, StudentAgent, agent_name):
     async with websockets.connect(url) as websocket:
@@ -95,6 +96,10 @@ async def proxy(url, StudentAgent, agent_name):
             msg = json.loads(m)
             if msg['cmd'] == 'ping':
                 await websocket.send(json.dumps({}))
+            elif msg['cmd'] == 'destroy':
+                logging.info("GAME OVER")
+                websocket.close()
+                return
             elif msg['cmd'] == 'updateBody':
                 agent.updateBody([(b[0], b[1]) for b in msg['body']])
             elif msg['cmd'] == 'update':
