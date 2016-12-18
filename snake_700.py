@@ -175,7 +175,7 @@ class MyAgent700(Snake):
                 self.food_found = True
                 print("DEBUG 8")
                 return self.retracePath(Node(startPos),currentNode)
-            if pygame.time.get_ticks() - begin_time > self.agent_time - 0.5:
+            if pygame.time.get_ticks() - begin_time > self.agent_time - 5:
                 print("DEBUG 9")
                 return self.retracePath(Node(startPos),currentNode)
             print("DEBUG 10")
