@@ -9,7 +9,7 @@ class MyAgent700(Snake):
         self.last = None
         self.temp_len_players_positions = None
         self.closedNodes = []
-        #self.openNodes = []
+        self.openNodes = []
         self.food_found = False
 
     def pathlen(self,a,b):
@@ -63,6 +63,7 @@ class MyAgent700(Snake):
         
         
         # avoid if enemy is considerable closer than us
+        """
         if(self.pathlen(enemy_head,maze.foodpos) + 5 < shortest):
            # print("AVOID")
             self.direction=olddir
@@ -78,113 +79,123 @@ class MyAgent700(Snake):
             self.closedNodes = []
             self.food_found = False
         # astar saving the path
-        elif shortest > 5:
-           # print("FIGHT FOR IT")
+        """
+        if shortest > 5:
+            print("FIGHT FOR IT")
             path = self.aa_improved(position, self.direction, maze, begin_time)
-           # print("BLA")
+            print("BLA")
             if path and path[-1].dir in validdir:
+                print("--- FOLLOWED PATH DIR")
                 dir = path[-1].dir
             else:
                 dir = olddir
                 self.last = None
                 self.closedNodes = []
                 self.food_found = False
-           # print("DIR2: " + str(dir))
+                self.openNodes = []
+                print("--- FOLLOWED OLDDIR")
+            #print("DIR2: " + str(dir))
             self.direction = dir # if self.path está por segurança 
-          #  print("DIR2.2: " + str(self.direction))
+            #print("DIR2.2: " + str(self.direction))
         # regular astart
         else:
-          #  print("CLOSE")
+            print("CLOSE")
             self.last = None
             self.closedNodes = []
             self.food_found = False
+            self.openNodes = []
             path = self.aa_regular(position, self.direction, maze, begin_time)
             self.direction = path[-1].dir if path and path[-1].dir in validdir else olddir
-         #   print("DIR3: " + str(self.direction))
+            
+            print("DIR3: " + str(self.direction))
 
     def aa_regular(self,startPos, startDir, maze, begin_time):
         startNode=Node(startPos, dir=startDir)
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
-        openNodes=[]
+        #openNodes=[]
         closedNodes=[]
-        openNodes.append(startNode)
+        self.openNodes.append(startNode)
         
         
-        while openNodes!=[]:
-            currentNode = openNodes[0]
+        while self.openNodes!=[]:
+            currentNode = self.openNodes[0]
              
-            for node in openNodes:
+            for node in self.openNodes:
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
 
-            if currentNode in openNodes:
-                openNodes.remove(currentNode)
+            if currentNode in self.openNodes:
+                self.openNodes.remove(currentNode)
             closedNodes.append(currentNode)
         
             if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 0.5):
                return self.retracePath(startNode,currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
-                if n not in closedNodes and n not in openNodes:
-                    openNodes.append(n)
+                if n not in closedNodes and n not in self.openNodes:
+                    self.openNodes.append(n)
 
 
     def aa_improved(self,startPos, startDir, maze, begin_time):
         if self.food_found:
           #  print("bla1")
-          #  print("DEBUG 1")
+            print("DEBUG 1")
             return self.retracePath(Node(startPos),self.last)
         if self.last:
           #  print("bla2")
-           # print("DEBUG 2")
+            print("DEBUG 2")
             startNode = self.last
             if self.last in self.closedNodes:
                 self.closedNodes.remove(self.last) 
         else:
           #  print("bla3")
             startNode=Node(startPos, dir=startDir)
-       # print("DEBUG 3")
+        print("DEBUG 3")
         targetNode=Node(maze.foodpos)
         startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
         openNodes=[]
         #closedNodes=[]
         openNodes.append(startNode)
         
-       # print("DEBUG 4")
+        print("DEBUG 4")
         while openNodes!=[]:
             currentNode = openNodes[0]
-       #     print("DEBUG 5")
+            print("DEBUG 5")
             for node in openNodes:
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
-         #   print("DEBUG 6")        
+            print("DEBUG 6")        
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
             self.closedNodes.append(currentNode)
         
-       #     print("DEBUG 7")
+            print("DEBUG 7")
             if currentNode == targetNode:
                 self.food_found = True
-       #         print("DEBUG 8")
+                print("DEBUG 8")
                 return self.retracePath(Node(startPos),currentNode)
             if pygame.time.get_ticks() - begin_time > self.agent_time - 0.5:
-       #         print("DEBUG 9")
+                print("DEBUG 9")
                 return self.retracePath(Node(startPos),currentNode)
-       #     print("DEBUG 10")
+            print("DEBUG 10")
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
                 if n not in self.closedNodes and n not in openNodes:
                     openNodes.append(n)
-        #print("DEBUG 11")
+        print("DEBUG 11")
+        self.last = None
+        self.closedNodes = []
+        self.food_found = False
+        self.openNodes = []
     def retracePath(self,startNode, endNode):
         path=[]
         currentNode = endNode
         self.last = endNode
-       # print("startNode: " + str(startNode))
-       # print("DEBUG 20")
+        print("startNode: " + str(startNode))
+        #print("DEBUG 20")
         while currentNode != startNode:
         #    print("DEBUG 21")
-        #    print("currentNode: " + str(currentNode))
+            print("currentNode: " + str(currentNode))
             path.append(currentNode)
             currentNode = currentNode.parent
         #    print("DEBUD 22 --- currentNode = " + str(currentNode))
