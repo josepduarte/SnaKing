@@ -3,10 +3,15 @@ from constants import *
 import math
 import pygame
 
-class MyAgent666(Snake):
-    def __init__(self,body=[(0,0)] , direction=(1,0), name="Agent1"):
+class MyAgent702(Snake):
+    def __init__(self,body=[(0,0)] , direction=(1,0), name="Jewpacabra"):
         super().__init__(body,direction,name=name)
         self.path = []
+        self.last = None
+        self.temp_len_players_positions = None
+        self.closedNodes = []
+        self.openNodes = []
+
     def pathlen(self,a,b):
         distX = abs(a[0]-b[0])
         distY = abs(a[1]-b[1])
@@ -25,6 +30,13 @@ class MyAgent666(Snake):
     def updateDirection(self,maze):
         begin_time = pygame.time.get_ticks();
 
+        temp_len = self.temp_len_players_positions
+        self.temp_len_players_positions = len(maze.playerpos)
+        if temp_len != self.temp_len_players_positions:
+            self.last = None
+            self.closedNodes = []
+            self.openNodes = []
+
         olddir=self.direction
         position=self.body[0]
         
@@ -39,28 +51,30 @@ class MyAgent666(Snake):
         #opponentSnakePos = [pos for pos in maze.playerpos if pos not in self.body]
         #if(self.pathlen(opponentSnakePos[0],maze.foodpos) + 10 < shortest):
         #    self.direction=olddir
-        """
-        if(shortest>25):
-            for dir in validdir:
-                newpos=self.add(position,dir)
-                newlen=self.pathlen(newpos , maze.foodpos)#length in shortest path
-                if newlen < shortest:
-                    olddir=dir
-                    shortest=newlen
-            self.direction=olddir 
-        else:
-        """
+        
         path = self.aa(position, self.direction, maze, begin_time)
-        #print("BLA")
-        dir = path[-1].dir if path and path[-1].dir in validdir else olddir
+        if path and path[-1].dir in validdir:
+            dir = path[-1].dir
+        else:
+            dir = olddir
+            self.last = None
+            self.openNodes = []
+            self.closedNodes = []
         self.direction = dir # if self.path está por segurança 
     
     def aa(self,startPos, startDir, maze, begin_time):
-        startNode=Node(startPos, dir=startDir)
+     #   print("=================== STARTNODE = " + str(startPos) + "===================")
         targetNode=Node(maze.foodpos)
-        startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
+        if self.last:
+            if self.last == targetNode:
+                return self.retracePath(Node(startPos), self.last)
+            else:
+                startNode = self.last
+        else:
+            startNode=Node(startPos, dir=startDir)
+            startNode.hCost = self.pathlen(startPos,targetNode.get_pos())
+
         openNodes=[]
-        closedNodes=[]
         openNodes.append(startNode)
         
         
@@ -73,47 +87,62 @@ class MyAgent666(Snake):
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
-            closedNodes.append(currentNode)
+            self.closedNodes.append(currentNode)
         
             if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 1):
-               return self.retracePath(startNode,currentNode)
+                self.last = currentNode
+                return self.retracePath(Node(startPos),currentNode)
             
             for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
-                if n not in closedNodes and n not in openNodes:
+                if n not in self.closedNodes and n not in openNodes:
                     openNodes.append(n)
+
+     #   print("GETTED OUT OF THE WHILE")
 
     def retracePath(self,startNode, endNode):
         path=[]
         currentNode = endNode
+       # print("-----------------------------------------")
+       # print("STARNODE: " + str(startNode))
+       # print("ENDNODE: " + str(endNode))
         while currentNode != startNode:
             path.append(currentNode)
+        #    print("NODE: " + str(currentNode.get_pos()) + "---» PARENT: " + str(currentNode.parent))
+        #    print("RESULT: " + str(startNode) + "+" + str(currentNode.dir) + "= " + str(self.add(startNode.get_pos(), currentNode.dir)))
             currentNode = currentNode.parent
+        #print("_________________________________________")
         return path #if path else [startNode]
 
     def getNeighbours(self,node,foodNode,maze):
         neighbours = []
         validdirs = self.getValidDirs(node,maze) 
+        node_for_diag = None
         for dir in validdirs:
             coord = self.add((node.x,node.y),dir)
             newnode = Node(coord, dir=dir,gCost=node.gCost+1,parent=node)
+           # print("NODE: " + str(newnode.get_pos()) + " - " + str(newnode.dir) + "---» PARENT: " + str(newnode.parent))
+            if dir == node.dir:
+                node_for_diag = newnode
             newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
             neighbours.append(newnode)
-        for diagDir in self.getValidDirsDiag(node,maze):
-            coord = self.add((node.x,node.y),diagDir)
-            if node.dir == up or node.dir == down:
-                if diagDir == (-1,-1) or diagDir == (-1,1):
-                    dir = left
+        if node.dir in validdirs:
+            for diagDir in self.getValidDirsDiag(node,maze):
+                coord = self.add((node.x,node.y),diagDir)
+                if node.dir == up or node.dir == down:
+                    if diagDir == (-1,-1) or diagDir == (-1,1):
+                        dir = left
+                    else:
+                        dir = right
                 else:
-                    dir = right
-            else:
-                if diagDir == (-1,-1) or diagDir == (1,-1):
-                    dir = up
-                else:
-                    dir = down
-            if dir in validdirs:
-                newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node)
-                newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
-                neighbours.append(newnode)  
+                    if diagDir == (-1,-1) or diagDir == (1,-1):
+                        dir = up
+                    else:
+                        dir = down
+                if dir in validdirs:
+                    newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node_for_diag)
+             #       print("NODE: " + str(newnode.get_pos()) + " - " + str(newnode.dir) + "---» PARENT: " + str(newnode.parent))
+                    newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
+                    neighbours.append(newnode)  
         return neighbours
     def getValidDirs(self,node,maze):       
         position=node.get_pos()

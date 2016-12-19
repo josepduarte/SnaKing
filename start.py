@@ -3,7 +3,12 @@ from agent1 import Agent1
 from maze import Maze
 from snake_666 import MyAgent666
 from snake_667 import MyAgent667
-from snake_668 import MyAgent668
+from snake_700 import MyAgent700
+from snake_701 import MyAgent701
+from snake_702 import MyAgent702
+from snake_703 import MyAgent703
+from snake_704 import MyAgent704
+from snake705 import MyAgent705
 from snake_astar_w_jps import Agent_jps
 import importlib
 import asyncio
@@ -20,11 +25,11 @@ def main(argv):
     agentproxy = False
     url = 'ws://localhost:8765' 
     url = None
-    StudentAgent = MyAgent666
-    studentAgent_name = "Agent666"
+    StudentAgent = MyAgent700
+    studentAgent_name = "Jewpacabra"
     student_url = None
-    OponentAgent = MyAgent666
-    oponentAgent_name = "Agent1"
+    OponentAgent = MyAgent700
+    oponentAgent_name = "Agent700"
     oponent_url = None
     try:
         opts, args = getopt.getopt(argv,"hm:s:o:p",["help","map=","disable-video","student-agent=","oponent-agent=","proxy"])
@@ -67,7 +72,7 @@ def main(argv):
         asyncio.get_event_loop().run_until_complete(proxy(student_url,StudentAgent, studentAgent_name))
     else:
         try:
-            game=SnakeGame(hor=60, ver=40, fps=20, visual=visual, obstacles=15, mapa=inputfile)
+            game=SnakeGame(hor=60, ver=40, fps=50, visual=visual, obstacles=15, mapa=inputfile)
             print("Launching game <{}>".format(game.gameid))
             game.setPlayers([  
                 StudentAgent([game.playerPos()], name=studentAgent_name) if student_url == None else StudentAgent([game.playerPos()], name=studentAgent_name, url=student_url,gameid=game.gameid),

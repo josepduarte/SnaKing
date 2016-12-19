@@ -45,7 +45,16 @@ class MyAgent667(Snake):
         invaliddir=[x for (x,y) in complement if y==olddir]
         validdir=[dir for dir in directions if not ( dir in invaliddir )]
         
-        validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos) or self.add(position,dir) in self.body] 
+        
+        if len(self.body) > len(maze.playerpos):
+            validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos)]
+        else:
+            # possible enemy positions
+            enemy_head = [pos for pos in maze.playerpos if pos not in self.body][0]
+            possible_next_enemy_position = [self.add(enemy_head, dir) for dir in directions]
+            validdir=[dir for dir in validdir if not (self.add(position,dir) in maze.obstacles or self.add(position,dir) in maze.playerpos or self.add(position,dir) in possible_next_enemy_position)]
+
+
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
         

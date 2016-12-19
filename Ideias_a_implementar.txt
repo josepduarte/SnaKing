@@ -5,4 +5,4 @@ Ideas still to implement:
 			 vamos para essa posição
 		- se não:
 			 mudamos
-	- 
+	- mudar as constantes 60 e 40 do pathlen para variaveis
