@@ -108,7 +108,12 @@ class MyAgent700(Snake):
             if path and path[-1].dir in validdir:
                 dir = path[-1].dir
             else:
-                dir = olddir
+                direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+                if not direction:
+                    direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
+                if not direction:
+                    direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+                dir = direction[0] if direction else olddir
                 self.last = None
                 self.closedNodes = []
                 self.food_found = False
@@ -117,7 +122,15 @@ class MyAgent700(Snake):
             self.closedNodes = []
             self.food_found = False
             path = self.aa_regular(position, self.direction, maze, begin_time)
-            dir = path[-1].dir if path and path[-1].dir in validdir else olddir
+            if path and path[-1].dir in validdir:
+                dir = path[-1].dir 
+            else:
+                direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+                if not direction:
+                    direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
+                if not direction:
+                    direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+                dir = direction[0] if direction else olddir
 
         self.direction = dir
 
