@@ -138,6 +138,7 @@ class MyAgent700(Snake):
 
 
     def aa_improved(self,startPos, startDir, maze, begin_time):
+        targetNode=Node(maze.foodpos)
         if self.food_found:
           #  print("bla1")
            # print("DEBUG 1")
@@ -151,9 +152,8 @@ class MyAgent700(Snake):
         else:
           #  print("bla3")
             startNode=Node(startPos, dir=startDir)
-        #print("DEBUG 3")
-        targetNode=Node(maze.foodpos)
-        startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
+            startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
+        #print("DEBUG 3")  
         openNodes=[]
         #closedNodes=[]
         openNodes.append(startNode)
