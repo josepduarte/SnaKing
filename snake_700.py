@@ -51,14 +51,16 @@ class MyAgent700(Snake):
     def get_pixel_free_path(self, pos):
         return [self.add(pos, dir) for dir in directions if self.add(pos, dir) not in self.maze_obstacles]
 
-           
+
 
     def updateDirection(self,maze):
         if not self.temp_len_players_positions: # only to occur at the first time
             self.maze_obstacles = maze.obstacles
             self.update_map();
-        begin_time = pygame.time.get_ticks();
-        
+            begin_time = 1000
+        else:
+             begin_time = pygame.time.get_ticks();
+
         temp_len = self.temp_len_players_positions
         self.temp_len_players_positions = len(maze.playerpos)
         if temp_len != self.temp_len_players_positions:
@@ -68,7 +70,7 @@ class MyAgent700(Snake):
 
         olddir=self.direction
         position=self.body[0]
-        
+
         complement=[(up,down),(down,up),(right,left),(left,right)]
         invaliddir=[x for (x,y) in complement if y==olddir]
         validdir=[dir for dir in directions if not ( dir in invaliddir )]
@@ -80,11 +82,11 @@ class MyAgent700(Snake):
             enemy_head = [pos for pos in maze.playerpos if pos not in self.body][0]
             possible_next_enemy_position = [self.add(enemy_head, dir) for dir in directions]
             validdir=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos or self.add(position,dir) in possible_next_enemy_position)]
-        
+
 
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
-            
+
         # avoid if enemy is considerable closer than us
         """
         if(self.pathlen(enemy_head,maze.foodpos) + 5 < shortest):
@@ -128,11 +130,11 @@ class MyAgent700(Snake):
         openNodes=[]
         closedNodes=[]
         openNodes.append(startNode)
-        
-        
+
+
         while openNodes!=[]:
             currentNode = openNodes[0]
-             
+
             for node in openNodes:
                 if node.fCost() < currentNode.fCost():
                     currentNode = node
@@ -140,11 +142,11 @@ class MyAgent700(Snake):
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
-        
+
             if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 5):
                return self.retracePath(startNode,currentNode)
-            
-            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
+
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
                 if n not in closedNodes and n not in openNodes:
                     openNodes.append(n)
 
@@ -156,28 +158,28 @@ class MyAgent700(Snake):
         if self.last:
             startNode = self.last
             if self.last in self.closedNodes:
-                self.closedNodes.remove(self.last) 
+                self.closedNodes.remove(self.last)
         else:
             startNode=Node(startPos, dir=startDir)
-            startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))  
+            startNode.hCost = self.pathlen((startPos[0],startPos[1]),(targetNode.x,targetNode.y))
         openNodes=[]
         openNodes.append(startNode)
-        
+
         while openNodes!=[]:
             currentNode = openNodes[0]
             for node in openNodes:
                 if node.fCost() < currentNode.fCost():
-                    currentNode = node        
+                    currentNode = node
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
             self.closedNodes.append(currentNode)
-        
+
             if currentNode == targetNode:
                 self.food_found = True
                 return self.retracePath(Node(startPos),currentNode)
             if pygame.time.get_ticks() - begin_time > self.agent_time - 5:
                 return self.retracePath(Node(startPos),currentNode)
-            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar 
+            for n in self.getNeighbours(currentNode, targetNode, maze):#otimizar
                 if n not in self.closedNodes and n not in openNodes:
                     openNodes.append(n)
         self.last = None
@@ -195,7 +197,7 @@ class MyAgent700(Snake):
 
     def getNeighbours(self,node,foodNode,maze):
         neighbours = []
-        validdirs = self.getValidDirs(node,maze) 
+        validdirs = self.getValidDirs(node,maze)
         node_for_diag = None
         for dir in validdirs:
             coord = self.add((node.x,node.y),dir)
@@ -220,9 +222,9 @@ class MyAgent700(Snake):
                 if dir in validdirs:
                     newnode = Node(coord, dir=dir,gCost=node.gCost+2,parent=node_for_diag)
                     newnode.hCost = self.pathlen((newnode.x,newnode.y),(foodNode.x,foodNode.y))
-                    neighbours.append(newnode)  
+                    neighbours.append(newnode)
         return neighbours
-    def getValidDirs(self,node,maze):       
+    def getValidDirs(self,node,maze):
         position=node.get_pos()
         dirs = []
         complement=[(up,down),(down,up),(right,left),(left,right)]
@@ -231,7 +233,7 @@ class MyAgent700(Snake):
 
         return [dir for dir in validdir if not self.add(position,dir) in self.maze_obstacles and not self.add(position,dir) in maze.playerpos] #verificar se não vai contra o corpo
 
-    def getValidDirsDiag(self,node,maze):       
+    def getValidDirsDiag(self,node,maze):
         position=node.get_pos()
         diagComplement =[(up,(-1,1)), (up, (1,1)) , (down, (1,-1)), (down, (-1,-1)), (left, (1, 1)), (left, (1, -1)), (right, (-1,1)), (right, (-1, -1))]
         diagDirections = [(1,1),(1,-1),(-1,1),(-1,-1)]
