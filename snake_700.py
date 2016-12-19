@@ -15,15 +15,19 @@ class MyAgent700(Snake):
 
 
     def pathlen(self,a,b):
+        width=self.mapsize[0]
+        heigth=self.mapsize[1]
         distX = abs(a[0]-b[0])
         distY = abs(a[1]-b[1])
-        if distX > 60/2:
-            distX = 60- distX;
-        if distY > 40/2:
-            distY = 40 - distY;
+        if distX > width/2:
+            distX = width- distX;
+        if distY > heigth/2:
+            distY = heigth - distY;
         return distX + distY
     def add(self,a,b):
-        return (a[0]+b[0])%60,(a[1]+b[1])%40
+        width=self.mapsize[0]
+        heigth=self.mapsize[1]
+        return (a[0]+b[0])%width,(a[1]+b[1])%heigth
     def update(self,points=None, mapsize=None, count=None,agent_time=None):
         #self.points=points
         self.mapsize=mapsize
