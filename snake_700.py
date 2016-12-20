@@ -11,6 +11,8 @@ class MyAgent700(Snake):
         self.closedNodes = []
         #self.openNodes = []
         self.food_found = False
+        self.aa_regular_food_found=False
+        self.oneTimeWasFound=False
         self.maze_obstacles = []
         self.reset = 5
         self.counter = 0
@@ -108,7 +110,7 @@ class MyAgent700(Snake):
 
         temp_len = self.temp_len_players_positions
         self.temp_len_players_positions = len(maze.playerpos)
-        if temp_len != self.temp_len_players_positions: 
+        if temp_len != self.temp_len_players_positions:
             self.reset_data()
 
         olddir=self.direction
@@ -126,7 +128,7 @@ class MyAgent700(Snake):
             enemy_head = enemy_pos[0]
             possible_next_enemy_position = [self.add(enemy_head, dir) for dir in directions]
             validdir=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos or self.add(position,dir) in possible_next_enemy_position)]
-
+            print(validdir)
 
         olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
@@ -154,25 +156,43 @@ class MyAgent700(Snake):
             dir = vdirs[0] if vdirs else olddir
             self.reset_data()
         # astar saving the path
-        elif shortest > 3:
+        elif not self.food_found:
             path = self.aa_improved(position, self.direction, maze, begin_time)
             if path and path[-1].dir in validdir:
                 dir = path[-1].dir
             else:
                 vdirs = self.get_validirs(position, validdir, maze)
                 dir = vdirs[0] if vdirs else olddir
-                
                 self.reset_data()
         # regular aastar
         else:
-            self.reset_data()
-
             path = self.aa_regular(position, self.direction, maze, begin_time)
-            if path and path[-1].dir in validdir:
-                dir = path[-1].dir 
+            if self.aa_regular_food_found:
+                print("aa_regular_food_found")
+                self.oneTimeWasFound=True
+                self.aa_regular_food_found=False
+                if path and path[-1].dir in validdir:
+                    dir = path[-1].dir
+                else:
+                    print("erro2")
+                    direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+                    if not direction:
+                        direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
+                    if not direction:
+                        direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+                    dir = direction[0] if direction else olddir
             else:
-                vdirs = self.get_validirs(position, validdir, maze)
-                dir = vdirs[0] if vdirs else olddir
+                if self.oneTimeWasFound:
+                    self.oneTimeWasFound=False
+                    self.reset_data()
+                path = self.aa_improved(position, self.direction, maze, begin_time)
+                if path and path[-1].dir in validdir:
+                    dir = path[-1].dir
+                else:
+                    vdirs = self.get_validirs(position, validdir, maze)
+                    dir = vdirs[0] if vdirs else olddir
+
+                    self.reset_data()
 
         self.direction = dir
 
@@ -189,18 +209,24 @@ class MyAgent700(Snake):
         while openNodes!=[]:
             currentNode = openNodes[0]
 
-            currentNode = min(openNodes, key = lambda node : node.fCost())
+            for node in openNodes:
+                if node.fCost() < currentNode.fCost():
+                    currentNode = node
 
             if currentNode in openNodes:
                 openNodes.remove(currentNode)
             closedNodes.append(currentNode)
 
-            if currentNode == targetNode or (pygame.time.get_ticks() - begin_time > self.agent_time - 5):
-               return self.retracePath(startNode,currentNode)
+            if currentNode == targetNode:
+                print("==================================TARGET=REACHED====================================================")
+                self.aa_regular_food_found=True
+                return self.retracePath(startNode,currentNode)
+            elif(pygame.time.get_ticks() - begin_time > self.agent_time - 5):
+                self.aa_regular_food_found=False
+                return self.retracePath(startNode,currentNode)
 
             neighbours = self.getNeighbours(currentNode, targetNode, self.maze_obstacles, maze.playerpos)
             [openNodes.append(n) for n in neighbours if n not in self.closedNodes and n not in openNodes]
-
 
     def aa_improved(self,startPos, startDir, maze, begin_time):
         targetNode=Node(maze.foodpos)
@@ -230,6 +256,7 @@ class MyAgent700(Snake):
                 self.last = currentNode
                 self.path_to_food = self.retracePath(Node(startPos),currentNode)
                 return self.path_to_food
+
             if pygame.time.get_ticks() - begin_time > self.agent_time - 5:
                 self.last = currentNode
                 return self.retracePath(Node(startPos),currentNode)
