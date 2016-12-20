@@ -89,23 +89,32 @@ class MyAgent700(Snake):
 
         # avoid if enemy is considerable closer than us
         """
-        if(self.pathlen(enemy_head,maze.foodpos) + 5 < shortest):
-           # print("AVOID")
-            self.direction=olddir
+        if(self.pathlen(enemy_head,maze.foodpos) + 6 < shortest):
+            direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+            if not direction:
+                direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
+            if not direction:
+                direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+            dir = direction[0] if direction else olddir
+            
             self.last = None
             self.closedNodes = []
             self.food_found = False
-          #  print("DIR1: " + str(self.direction))
-        # avoid food if we are +5 larger than enemy
-        if len(self.body) > (len(maze.playerpos) - len(self.body) + 200):
-           # print("AVOID 2")
-            self.direction = olddir
+        """
+        # avoid food if we are +7 larger than enemy
+        if len(self.body) > (len(maze.playerpos) - len(self.body) + 6):
+            direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+            if not direction:
+                direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
+            if not direction:
+                direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+            dir = direction[0] if direction else olddir
+
             self.last = None
             self.closedNodes = []
             self.food_found = False
         # astar saving the path
-        """
-        if shortest > 3:
+        elif shortest > 3:
             path = self.aa_improved(position, self.direction, maze, begin_time)
             if path and path[-1].dir in validdir:
                 dir = path[-1].dir
