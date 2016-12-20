@@ -174,12 +174,8 @@ class MyAgent700(Snake):
                 if path and path[-1].dir in validdir:
                     dir = path[-1].dir
                 else:
-                    print("erro2")
-                    direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
-                    if not direction:
-                        direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
-                    if not direction:
-                        direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
+                    vdirs = self.get_validirs(position, validdir, maze)
+                    dir = vdirs[0] if vdirs else olddir
                     dir = direction[0] if direction else olddir
             else:
                 if self.oneTimeWasFound:
