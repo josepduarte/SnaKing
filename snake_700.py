@@ -61,12 +61,21 @@ class MyAgent700(Snake):
         self.food_found  = False
 
     def get_validirs(self, position, validdir, maze):
-        direction = [d for d in validdir if self.add(position, d) not in maze.obstacles and self.add(position, d) not in maze.playerpos]
+        enemy_pos = [pos for pos in maze.playerpos if pos not in self.body]
+
+        if len(self.body) > len(maze.playerpos):
+            direction=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos)]
+        else:
+            # possible enemy positions
+            enemy_head = enemy_pos[0]
+            possible_next_enemy_position = [self.add(enemy_head, dir) for dir in directions]
+            direction=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos or self.add(position,dir) in possible_next_enemy_position)]
+            if not direction:
+                direction=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos)]
         if not direction:
             direction = [d for d in validdir if self.add(position, d) not in maze.obstacles]
         if not direction:
             direction = [d for d in validdir if self.add(position, d) not in maze.playerpos]
-        print("DIRECTION: " + str(direction))
         return direction
 
     """
@@ -120,18 +129,10 @@ class MyAgent700(Snake):
         complement=[(up,down),(down,up),(right,left),(left,right)]
         invaliddir=[x for (x,y) in complement if y==olddir]
         validdir=[dir for dir in directions if not ( dir in invaliddir )]
-        enemy_pos = [pos for pos in maze.playerpos if pos not in self.body]
 
-        if len(self.body) > len(maze.playerpos):
-            validdir=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos)]
-        else:
-            # possible enemy positions
-            enemy_head = enemy_pos[0]
-            possible_next_enemy_position = [self.add(enemy_head, dir) for dir in directions]
-            validdir=[dir for dir in validdir if not (self.add(position,dir) in self.maze_obstacles or self.add(position,dir) in maze.playerpos or self.add(position,dir) in possible_next_enemy_position)]
-            print(validdir)
+        validdir = self.get_validirs(position, validdir, maze)
+        olddir = validdir[0] if validdir else olddir
 
-        olddir= olddir if olddir in validdir or len(validdir)==0 else validdir[0]
         shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
 
         # if there is no path to get out of catch the food
@@ -141,13 +142,12 @@ class MyAgent700(Snake):
             dir = olddir
             print("AVOID FOOD")
         else:
-    """
+        """
+        enemy_pos = [pos for pos in maze.playerpos if pos not in self.body]
         intersects = [a for a in self.path_to_food if a.get_pos() in [b for b in maze.playerpos if b not in self.body]]
         if intersects:
-            print("intersects")
             point = intersects[0]
             if self.pathlen(enemy_pos[-1], point.get_pos()) < self.pathlen(self.body[0], point.get_pos()):
-                print("RESET")
                 self.reset_data()
 
             self.reset_data()
@@ -169,7 +169,6 @@ class MyAgent700(Snake):
         else:
             path = self.aa_regular(position, self.direction, maze, begin_time)
             if self.aa_regular_food_found:
-                print("aa_regular_food_found")
                 self.oneTimeWasFound=True
                 self.aa_regular_food_found=False
                 if path and path[-1].dir in validdir:
@@ -214,7 +213,6 @@ class MyAgent700(Snake):
             closedNodes.append(currentNode)
 
             if currentNode == targetNode:
-                print("==================================TARGET=REACHED====================================================")
                 self.aa_regular_food_found=True
                 return self.retracePath(startNode,currentNode)
             elif(pygame.time.get_ticks() - begin_time > self.agent_time - 5):
