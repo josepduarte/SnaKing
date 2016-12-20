@@ -3,7 +3,7 @@ from constants import *
 import math
 import pygame
 
-class MyAgent700(Snake):
+class StudentPlayer(Snake):
     def __init__(self,body=[(0,0)] , direction=(1,0), name="Jewpacabra"):
         super().__init__(body,direction,name=name)
         self.last = None
@@ -77,79 +77,82 @@ class MyAgent700(Snake):
         return direction
 
     def updateDirection(self,maze):
-        if not self.temp_len_players_positions: # only to occur at the first time
-            self.maze_obstacles = maze.obstacles
-            self.update_map();
-            begin_time = 1000
-        else:
-             begin_time = pygame.time.get_ticks();
+        try:
+            if not self.temp_len_players_positions: # only to occur at the first time
+                self.maze_obstacles = maze.obstacles
+                self.update_map();
+                begin_time = 1000
+            else:
+                 begin_time = pygame.time.get_ticks();
 
-        temp_len = self.temp_len_players_positions
-        self.temp_len_players_positions = len(maze.playerpos)
-        if temp_len != self.temp_len_players_positions:
-            self.reset_data()
-
-        olddir=self.direction
-        position=self.body[0]
-
-        complement=[(up,down),(down,up),(right,left),(left,right)]
-        invaliddir=[x for (x,y) in complement if y==olddir]
-        validdir=[dir for dir in directions if not ( dir in invaliddir )]
-
-        validdir = self.get_validirs(position, validdir, maze)
-        olddir = validdir[0] if validdir else olddir
-
-        shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
-
-
-        enemy_pos = [pos for pos in maze.playerpos if pos not in self.body]
-        intersects = [a for a in self.path_to_food if a.get_pos() in [b for b in maze.playerpos if b not in self.body]]
-        if intersects:
-            point = intersects[0]
-            if self.pathlen(enemy_pos[-1], point.get_pos()) < self.pathlen(self.body[0], point.get_pos()):
+            temp_len = self.temp_len_players_positions
+            self.temp_len_players_positions = len(maze.playerpos)
+            if temp_len != self.temp_len_players_positions:
                 self.reset_data()
 
-            self.reset_data()
-        # avoid food if we are +7 larger than enemy
-        if len(self.body) > (len(maze.playerpos) - len(self.body) + 6):
-            vdirs = self.get_validirs(position, validdir, maze)
-            dir = vdirs[0] if vdirs else olddir
-            self.reset_data()
-        # astar saving the path
-        elif not self.food_found:
-            path = self.aa_improved(position, self.direction, maze, begin_time)
-            if path and path[-1].dir in validdir:
-                dir = path[-1].dir
-            else:
+            olddir=self.direction
+            position=self.body[0]
+
+            complement=[(up,down),(down,up),(right,left),(left,right)]
+            invaliddir=[x for (x,y) in complement if y==olddir]
+            validdir=[dir for dir in directions if not ( dir in invaliddir )]
+
+            validdir = self.get_validirs(position, validdir, maze)
+            olddir = validdir[0] if validdir else olddir
+
+            shortest=self.pathlen(self.add(position,olddir) , maze.foodpos)
+
+
+            enemy_pos = [pos for pos in maze.playerpos if pos not in self.body]
+            intersects = [a for a in self.path_to_food if a.get_pos() in [b for b in maze.playerpos if b not in self.body]]
+            if intersects:
+                point = intersects[0]
+                if self.pathlen(enemy_pos[-1], point.get_pos()) < self.pathlen(self.body[0], point.get_pos()):
+                    self.reset_data()
+
+                self.reset_data()
+            # avoid food if we are +7 larger than enemy
+            if len(self.body) > (len(maze.playerpos) - len(self.body) + 6):
                 vdirs = self.get_validirs(position, validdir, maze)
                 dir = vdirs[0] if vdirs else olddir
                 self.reset_data()
-        # regular aastar
-        else:
-            path = self.aa_regular(position, self.direction, maze, begin_time)
-            if self.aa_regular_food_found:
-                self.oneTimeWasFound=True
-                self.aa_regular_food_found=False
-                if path and path[-1].dir in validdir:
-                    dir = path[-1].dir
-                else:
-                    vdirs = self.get_validirs(position, validdir, maze)
-                    dir = vdirs[0] if vdirs else olddir
-            else:
-                if self.oneTimeWasFound:
-                    self.oneTimeWasFound=False
-                    self.reset_data()
+            # astar saving the path
+            elif not self.food_found:
                 path = self.aa_improved(position, self.direction, maze, begin_time)
                 if path and path[-1].dir in validdir:
                     dir = path[-1].dir
                 else:
                     vdirs = self.get_validirs(position, validdir, maze)
                     dir = vdirs[0] if vdirs else olddir
-
                     self.reset_data()
+            # regular aastar
+            else:
+                path = self.aa_regular(position, self.direction, maze, begin_time)
+                if self.aa_regular_food_found:
+                    self.oneTimeWasFound=True
+                    self.aa_regular_food_found=False
+                    if path and path[-1].dir in validdir:
+                        dir = path[-1].dir
+                    else:
+                        vdirs = self.get_validirs(position, validdir, maze)
+                        dir = vdirs[0] if vdirs else olddir
+                else:
+                    if self.oneTimeWasFound:
+                        self.oneTimeWasFound=False
+                        self.reset_data()
+                    path = self.aa_improved(position, self.direction, maze, begin_time)
+                    if path and path[-1].dir in validdir:
+                        dir = path[-1].dir
+                    else:
+                        vdirs = self.get_validirs(position, validdir, maze)
+                        dir = vdirs[0] if vdirs else olddir
 
-        self.direction = dir
+                        self.reset_data()
 
+            self.direction = dir
+
+        except:
+            self.direction = (1,0)
 
     def aa_regular(self,startPos, startDir, maze, begin_time):
         startNode=Node(startPos, dir=startDir)
